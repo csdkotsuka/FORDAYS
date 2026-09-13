@@ -9,6 +9,7 @@ import { AddEventModal } from '@/components/AddEventModal';
 import { ConfigHelpModal } from '@/components/ConfigHelpModal';
 import { OwnerLoginModal } from '@/components/OwnerLoginModal';
 import { OfficialPhoneBanners } from '@/components/OfficialBanner';
+import { SyncCalendarModal } from '@/components/SyncCalendarModal';
 import {
   Calendar as CalendarIcon,
   List,
@@ -32,6 +33,7 @@ export default function Home() {
   const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [showOwnerModal, setShowOwnerModal] = useState<boolean>(false);
+  const [showSyncModal, setShowSyncModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isMock, setIsMock] = useState<boolean>(false);
@@ -334,9 +336,9 @@ export default function Home() {
 
       {/* Main Container */}
       <div className="max-w-4xl w-full mx-auto px-3 sm:px-6 pt-3 sm:pt-4 space-y-3 sm:space-y-4 flex-1 print:max-w-none print:p-0 print:m-0 print:space-y-0">
-        {/* Official Phone Advertisement Banners (Browser persistent, tap-to-call, hidden on print) */}
+        {/* Official Phone Advertisement Banners & Calendar Sync Button (Hidden on print) */}
         <div className="print:hidden">
-          <OfficialPhoneBanners />
+          <OfficialPhoneBanners onSyncClick={() => setShowSyncModal(true)} />
         </div>
 
         {/* API notification message / hint */}
@@ -473,6 +475,13 @@ export default function Home() {
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
         isMockData={isMock}
+      />
+
+      {/* Sync Calendar Modal (Grandma-friendly) */}
+      <SyncCalendarModal
+        isOpen={showSyncModal}
+        onClose={() => setShowSyncModal(false)}
+        events={allEvents}
       />
     </main>
   );
