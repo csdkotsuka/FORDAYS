@@ -86,58 +86,59 @@ export const OfficialPhoneBanners: React.FC = () => {
  */
 export const OfficialPrintHeader: React.FC<OfficialBannerProps> = ({
   currentDate = new Date(),
-  updateDateText = '9月4日更新',
+  updateDateText,
 }) => {
   const yearMonthStr = format(currentDate, 'yyyy年 M月', { locale: ja });
+  const displayUpdateDate = updateDateText || format(new Date(), 'M月d日更新', { locale: ja });
 
   return (
-    <div className="hidden print:flex items-center justify-between gap-3 w-full border-b-2 border-black pb-2 mb-2">
-      {/* 1. Gold Title Banner */}
-      <div className="bg-[#e59b00] text-black px-6 py-2 rounded-sm shadow-none flex-1 flex items-center justify-center">
-        <h1 className="text-xl font-black tracking-wider text-center text-black">
+    <div className="hidden print:flex items-center justify-between gap-4 w-full border-b-2 border-black pb-2 mb-2">
+      {/* 1. Gold Title Banner: Compact width to let phone ads fit cleanly */}
+      <div className="bg-[#e59b00] text-black px-4 py-2 rounded-xs shadow-none shrink-0 flex items-center justify-center">
+        <h1 className="text-base font-black tracking-wider text-center text-black whitespace-nowrap">
           {yearMonthStr} フォーデイズ予定表
         </h1>
       </div>
 
       {/* 2. Middle Banners: Consumer Consultation Dial & Customer Dial */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         {/* Consumer Consultation Dial */}
-        <div className="border border-[#004d25] rounded overflow-hidden bg-white text-center w-[170px]">
-          <div className="bg-[#004d25] text-white px-1 py-0.5 text-[9px] leading-tight font-bold">
+        <div className="border border-[#004d25] rounded overflow-hidden bg-white text-center w-[215px] shrink-0">
+          <div className="bg-[#004d25] text-white px-1.5 py-0.5 text-[8.5px] leading-tight font-bold whitespace-nowrap">
             気になることはお気軽にご相談ください<br />
             「消費者相談ダイヤル」
           </div>
-          <div className="py-0.5 px-1 bg-white">
-            <div className="text-[13px] font-black text-black leading-tight">
+          <div className="py-1 px-1 bg-white">
+            <div className="text-[14px] font-black text-black leading-tight tracking-wider whitespace-nowrap">
               0120-033-<span className="text-[#dc2626]">007</span>
             </div>
-            <div className="text-[7.5px] text-gray-700 font-bold leading-tight">
+            <div className="text-[8px] text-gray-800 font-bold leading-tight whitespace-nowrap mt-0.5">
               受付時間 平日10:00〜17:00
             </div>
           </div>
         </div>
 
         {/* Customer Dial */}
-        <div className="border border-[#0f172a] rounded overflow-hidden bg-white text-center w-[170px]">
-          <div className="bg-[#0f172a] text-white px-1 py-0.5 text-[9px] leading-tight font-bold">
+        <div className="border border-[#0f172a] rounded overflow-hidden bg-white text-center w-[215px] shrink-0">
+          <div className="bg-[#0f172a] text-white px-1.5 py-0.5 text-[8.5px] leading-tight font-bold whitespace-nowrap">
             ご注文、各種変更、お問合せは<br />
             「お客さまダイヤル」
           </div>
-          <div className="py-0.5 px-1 bg-white">
-            <div className="text-[13px] font-black text-black leading-tight">
+          <div className="py-1 px-1 bg-white">
+            <div className="text-[14px] font-black text-black leading-tight tracking-wider whitespace-nowrap">
               0120-950-888
             </div>
-            <div className="text-[7.5px] text-gray-700 font-bold leading-tight">
+            <div className="text-[8px] text-gray-800 font-bold leading-tight whitespace-nowrap mt-0.5">
               受付時間 平日9:45〜17:30 他
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Update Date Box */}
-      <div className="border border-black px-3 py-1 text-center shrink-0">
-        <span className="text-xs font-bold text-black tracking-wider">
-          {updateDateText}
+      {/* 3. Update Date Box: Shows Today's Date */}
+      <div className="border border-black px-3 py-1.5 text-center shrink-0">
+        <span className="text-xs font-bold text-black tracking-wider whitespace-nowrap">
+          {displayUpdateDate}
         </span>
       </div>
     </div>
