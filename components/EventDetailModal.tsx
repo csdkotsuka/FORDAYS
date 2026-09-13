@@ -242,8 +242,26 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
     : null;
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      if (isDirty) {
+        const confirmSave = window.confirm('変更内容を保存しますか？\n・[OK]: 保存して閉じる\n・[キャンセル]: 保存せずに閉じる');
+        if (confirmSave) {
+          handleSave();
+        } else {
+          onClose();
+        }
+      } else {
+        onClose();
+      }
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+    <div
+      onClick={handleBackdropClick}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm transition-opacity"
+    >
       <div
         className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
         onClick={(e) => e.stopPropagation()}
