@@ -7,6 +7,7 @@ import { ListView } from '@/components/ListView';
 import { EventDetailModal } from '@/components/EventDetailModal';
 import { AddEventModal } from '@/components/AddEventModal';
 import { ConfigHelpModal } from '@/components/ConfigHelpModal';
+import { OwnerLoginModal } from '@/components/OwnerLoginModal';
 import {
   Calendar as CalendarIcon,
   List,
@@ -14,15 +15,20 @@ import {
   HelpCircle,
   Plus,
   Info,
+  Lock,
+  ShieldCheck,
 } from 'lucide-react';
 
 const STORAGE_CUSTOM_EVENTS_KEY = 'fordays_custom_events';
-const STORAGE_EVENT_COLORS_KEY = 'fordays_event_colors';
+const STORAGE_EDITED_EVENTS_KEY = 'fordays_edited_events';
+const STORAGE_IS_OWNER_KEY = 'fordays_is_owner';
 
 export default function Home() {
   const [apiEvents, setApiEvents] = useState<CalendarEvent[]>([]);
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>([]);
-  const [eventColorMap, setEventColorMap] = useState<{ [id: string]: string }>({});
+  const [editedEventsMap, setEditedEventsMap] = useState<{ [id: string]: CalendarEvent }>({});
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [showOwnerModal, setShowOwnerModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isMock, setIsMock] = useState<boolean>(false);
@@ -33,17 +39,17 @@ export default function Home() {
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
-  // Load locally added custom events and event colors from localStorage
+  // Load state from localStorage on client mount
   useEffect(() => {
     try {
       const savedEvents = localStorage.getItem(STORAGE_CUSTOM_EVENTS_KEY);
-      if (savedEvents) {
-        setCustomEvents(JSON.parse(savedEvents));
-      }
-      const savedColors = localStorage.getItem(STORAGE_EVENT_COLORS_KEY);
-      if (savedColors) {
-        setEventColorMap(JSON.parse(savedColors));
-      }
+      if (savedEvents) setCustomEvents(JSON.parse(savedEvents));
+
+      const savedEdited = localStorage.getItem(STORAGE_EDITED_EVENTS_KEY);
+      if (savedEdited) setEditedEventsMap(JSON.parse(savedEdited));
+
+      const savedOwner = localStorage.getItem(STORAGE_IS_OWNER_KEY);
+      if (savedOwner === 'true') setIsOwner(true);
     } catch (e) {
       // ignore
     }
@@ -88,16 +94,22 @@ export default function Home() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Combined events with colors merged: API (Google/Mock) + Locally added events
+  // Combined events with edited overrides applied:
   const allEvents = useMemo(() => {
-    const combined = [...customEvents, ...apiEvents].map((ev) => ({
-      ...ev,
-      color: eventColorMap[ev.id] || ev.color || 'sky',
-    }));
+    const combined = [...customEvents, ...apiEvents].map((ev) => {
+      const edited = editedEventsMap[ev.id];
+      if (edited) {
+        return {
+          ...ev,
+          ...edited,
+        };
+      }
+      return ev;
+    });
     return combined.sort(
       (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
     );
-  }, [apiEvents, customEvents, eventColorMap]);
+  }, [apiEvents, customEvents, editedEventsMap]);
 
   const handleAddEvent = (newEvent: CalendarEvent) => {
     const updated = [newEvent, ...customEvents];
@@ -109,23 +121,50 @@ export default function Home() {
     }
   };
 
-  const handleUpdateEventColor = (eventId: string, newColorId: string) => {
-    const updatedMap = {
-      ...eventColorMap,
-      [eventId]: newColorId,
+  const handleUpdateEvent = (updated: CalendarEvent) => {
+    // 1. Update editedEventsMap
+    const newEditedMap = {
+      ...editedEventsMap,
+      [updated.id]: updated,
     };
-    setEventColorMap(updatedMap);
+    setEditedEventsMap(newEditedMap);
     try {
-      localStorage.setItem(STORAGE_EVENT_COLORS_KEY, JSON.stringify(updatedMap));
+      localStorage.setItem(STORAGE_EDITED_EVENTS_KEY, JSON.stringify(newEditedMap));
     } catch (e) {
       // ignore
     }
 
-    if (selectedEvent && selectedEvent.id === eventId) {
-      setSelectedEvent({
-        ...selectedEvent,
-        color: newColorId,
-      });
+    // 2. If it's a locally added custom event, update it there too
+    if (customEvents.some((c) => c.id === updated.id)) {
+      const newCustom = customEvents.map((c) => (c.id === updated.id ? updated : c));
+      setCustomEvents(newCustom);
+      try {
+        localStorage.setItem(STORAGE_CUSTOM_EVENTS_KEY, JSON.stringify(newCustom));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    if (selectedEvent && selectedEvent.id === updated.id) {
+      setSelectedEvent(updated);
+    }
+  };
+
+  const handleOwnerLogin = () => {
+    setIsOwner(true);
+    try {
+      localStorage.setItem(STORAGE_IS_OWNER_KEY, 'true');
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const handleOwnerLogout = () => {
+    setIsOwner(false);
+    try {
+      localStorage.removeItem(STORAGE_IS_OWNER_KEY);
+    } catch (e) {
+      // ignore
     }
   };
 
@@ -154,16 +193,41 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Add Event Button (Desktop/Tablet Header) */}
+            {/* Owner badge / Login button */}
             <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow active:scale-95 transition"
+              onClick={() => setShowOwnerModal(true)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                isOwner
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+              }`}
+              title={isOwner ? '持ち主としてログイン中' : 'アカウントの持ち主としてログイン'}
             >
-              <Plus className="w-4 h-4" />
-              <span>新規予定</span>
+              {isOwner ? (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>持ち主（編集可）</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-3.5 h-3.5 text-gray-400" />
+                  <span className="hidden sm:inline">閲覧中</span>
+                </>
+              )}
             </button>
 
-            {/* Status indicator / Help button */}
+            {/* Add Event Button: Visible to Owner, or triggers login */}
+            {isOwner && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow active:scale-95 transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span>新規予定</span>
+              </button>
+            )}
+
+            {/* Sync status indicator */}
             <button
               onClick={() => setShowHelpModal(true)}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition ${
@@ -285,14 +349,16 @@ export default function Home() {
         )}
       </div>
 
-      {/* Floating Action Button (FAB) on mobile */}
-      <button
-        onClick={() => setShowAddModal(true)}
-        className="sm:hidden fixed bottom-6 right-5 z-40 w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-500 text-white rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center active:scale-95 transition"
-        aria-label="予定を追加"
-      >
-        <Plus className="w-7 h-7" />
-      </button>
+      {/* Floating Action Button (FAB) on mobile: only for Owner */}
+      {isOwner && (
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="sm:hidden fixed bottom-6 right-5 z-40 w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-500 text-white rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center active:scale-95 transition"
+          aria-label="予定を追加"
+        >
+          <Plus className="w-7 h-7" />
+        </button>
+      )}
 
       {/* Add Event Modal */}
       <AddEventModal
@@ -307,7 +373,18 @@ export default function Home() {
       <EventDetailModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
-        onUpdateColor={handleUpdateEventColor}
+        isOwner={isOwner}
+        onUpdateEvent={handleUpdateEvent}
+        allEvents={allEvents}
+      />
+
+      {/* Owner Login Modal */}
+      <OwnerLoginModal
+        isOpen={showOwnerModal}
+        onClose={() => setShowOwnerModal(false)}
+        isOwner={isOwner}
+        onLogin={handleOwnerLogin}
+        onLogout={handleOwnerLogout}
       />
 
       {/* Config Help Modal */}
