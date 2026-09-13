@@ -15,3 +15,27 @@ body {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 5mm 6mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Prevent page breaks */
+  .print-page-fit {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

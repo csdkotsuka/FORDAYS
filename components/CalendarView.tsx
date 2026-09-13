@@ -23,7 +23,9 @@ import {
   Calendar as CalendarIcon,
   Clock,
   MapPin,
+  Printer,
 } from 'lucide-react';
+import { OfficialPrintHeader } from './OfficialBanner';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -110,10 +112,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     setSelectedDate(today);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Month Navigation Header */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100">
+    <div className="space-y-4 print:space-y-0 print-page-fit">
+      {/* Official Print Header for A4 PDF Output */}
+      <OfficialPrintHeader currentDate={currentDate} />
+
+      {/* Month Navigation Header (Hidden on print) */}
+      <div className="flex items-center justify-between bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 print:hidden">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-5 h-5 text-sky-600" />
           <h2 className="text-lg sm:text-xl font-bold text-gray-800">
@@ -122,6 +131,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {/* A4 PDF / Print button */}
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-2xs hover:shadow-xs transition active:scale-95 mr-1"
+            title="A4用紙でPDF出力 / 印刷"
+          >
+            <Printer className="w-3.5 h-3.5 text-sky-600" />
+            <span className="hidden sm:inline">A4 PDF出力</span>
+            <span className="sm:hidden">PDF</span>
+          </button>
+
           <button
             onClick={goToToday}
             className="px-3 py-1.5 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-lg transition"
@@ -146,15 +166,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       </div>
 
       {/* Calendar Grid Container */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Hint Bar */}
-        <div className="px-3 py-1.5 bg-sky-50/50 border-b border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden print:border-black print:rounded-none print:shadow-none">
+        {/* Hint Bar (Hidden on print) */}
+        <div className="px-3 py-1.5 bg-sky-50/50 border-b border-gray-100 flex items-center justify-between text-[11px] text-gray-500 print:hidden">
           <span>タップで詳細表示</span>
           <span className="text-sky-700 font-medium">日付長押しで新規予定を追加</span>
         </div>
 
         {/* Days of week header */}
-        <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/70 text-center text-xs font-semibold py-2.5">
+        <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/70 text-center text-xs font-semibold py-2.5 print:bg-gray-100 print:border-black print:py-1">
           {weekDays.map((dayName, idx) => {
             const isSun = idx === 0;
             const isSat = idx === 6;
@@ -215,20 +235,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     onSelectEvent(dayEvents[0]);
                   }
                 }}
-                className={`min-h-[76px] sm:min-h-[105px] p-1.5 sm:p-2 cursor-pointer select-none transition flex flex-col justify-between ${
-                  !inCurrentMonth ? 'bg-gray-50/40 text-gray-300' : 'hover:bg-sky-50/40'
-                } ${isSelected ? 'bg-sky-50 ring-2 ring-inset ring-sky-500' : ''}`}
+                className={`min-h-[76px] sm:min-h-[105px] print:min-h-[100px] p-1.5 sm:p-2 print:p-1 cursor-pointer select-none transition flex flex-col justify-between ${
+                  !inCurrentMonth ? 'bg-gray-50/40 text-gray-300 print:bg-gray-50/60 print:text-gray-400' : 'hover:bg-sky-50/40'
+                } ${isSelected ? 'bg-sky-50 ring-2 ring-inset ring-sky-500 print:ring-0 print:bg-transparent' : ''}`}
               >
                 {/* Date number */}
                 <div className="flex items-center justify-between">
                   <span
                     className={`inline-flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full ${
                       dayIsToday
-                        ? 'bg-sky-600 text-white shadow-sm'
+                        ? 'bg-sky-600 text-white shadow-sm print:bg-transparent print:text-black print:font-bold'
                         : isSelected
-                        ? 'bg-sky-200 text-sky-900'
+                        ? 'bg-sky-200 text-sky-900 print:bg-transparent print:text-black'
                         : !inCurrentMonth
-                        ? 'text-gray-300'
+                        ? 'text-gray-300 print:text-gray-400'
                         : isSun
                         ? 'text-rose-600'
                         : isSat
@@ -240,14 +260,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   </span>
 
                   {dayEvents.length > 0 && (
-                    <span className="text-[10px] sm:text-xs font-bold text-sky-700 bg-sky-100 rounded-full px-1.5">
+                    <span className="text-[10px] sm:text-xs font-bold text-sky-700 bg-sky-100 rounded-full px-1.5 print:hidden">
                       {dayEvents.length}
                     </span>
                   )}
                 </div>
 
-                {/* Event previews in calendar cell */}
-                <div className="mt-1 space-y-1 overflow-hidden flex-1">
+                {/* Event previews in calendar cell - Screen View */}
+                <div className="mt-1 space-y-1 overflow-hidden flex-1 print:hidden">
                   {dayEvents.slice(0, 2).map((ev) => {
                     const evTheme = getColorTheme(ev.color);
                     return (
@@ -281,14 +301,41 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Event previews in calendar cell - Print View (Show all events with details) */}
+                <div className="hidden print:flex flex-col space-y-0.5 mt-0.5 overflow-visible flex-1">
+                  {dayEvents.map((ev) => {
+                    const evTheme = getColorTheme(ev.color);
+                    const sTime = ev.allDay ? '' : format(new Date(ev.start), 'HH:mm');
+                    return (
+                      <div
+                        key={ev.id}
+                        style={{
+                          backgroundColor: evTheme.bgLight,
+                          color: evTheme.textDark,
+                          borderColor: evTheme.border,
+                        }}
+                        className="text-[8px] leading-tight border rounded px-1 py-0.5 font-bold"
+                      >
+                        {sTime && <span className="mr-0.5 text-[7px]">{sTime}〜</span>}
+                        <span>{ev.title}</span>
+                        {ev.location && (
+                          <span className="block font-normal text-[7px] text-gray-600 truncate">
+                            ({ev.location})
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Selected Day's Events Section */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+      {/* Selected Day's Events Section (Hidden on print) */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3 print:hidden">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-sky-600" />

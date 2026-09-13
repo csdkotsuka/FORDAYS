@@ -8,6 +8,7 @@ import { EventDetailModal } from '@/components/EventDetailModal';
 import { AddEventModal } from '@/components/AddEventModal';
 import { ConfigHelpModal } from '@/components/ConfigHelpModal';
 import { OwnerLoginModal } from '@/components/OwnerLoginModal';
+import { OfficialPhoneBanners } from '@/components/OfficialBanner';
 import {
   Calendar as CalendarIcon,
   List,
@@ -222,9 +223,9 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col pb-20 sm:pb-12">
-      {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200/80 px-3 sm:px-4 py-2.5 sm:py-4 transition-all">
+    <main className="min-h-screen bg-slate-50 flex flex-col pb-20 sm:pb-12 print:bg-white print:pb-0 print:p-0 print:m-0">
+      {/* Top Header (Hidden on print) */}
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200/80 px-3 sm:px-4 py-2.5 sm:py-4 transition-all print:hidden">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
@@ -318,12 +319,17 @@ export default function Home() {
       </header>
 
       {/* Main Container */}
-      <div className="max-w-4xl w-full mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-4 flex-1">
+      <div className="max-w-4xl w-full mx-auto px-3 sm:px-6 pt-3 sm:pt-4 space-y-3 sm:space-y-4 flex-1 print:max-w-none print:p-0 print:m-0 print:space-y-0">
+        {/* Official Phone Advertisement Banners (Browser persistent, tap-to-call, hidden on print) */}
+        <div className="print:hidden">
+          <OfficialPhoneBanners />
+        </div>
+
         {/* API notification message / hint */}
         {apiMessage && (
           <div
             onClick={() => setShowHelpModal(true)}
-            className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start justify-between gap-2 cursor-pointer hover:bg-amber-100/70 transition group"
+            className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start justify-between gap-2 cursor-pointer hover:bg-amber-100/70 transition group print:hidden"
           >
             <div className="flex items-start gap-2 text-xs sm:text-sm text-amber-900 font-medium">
               <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -335,8 +341,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* View Switcher Tabs */}
-        <div className="flex items-center justify-center">
+        {/* View Switcher Tabs (Hidden on print) */}
+        <div className="flex items-center justify-center print:hidden">
           <div className="bg-gray-200/80 p-1 rounded-2xl flex items-center w-full max-w-xs shadow-inner">
             <button
               onClick={() => setViewMode('calendar')}
@@ -406,7 +412,7 @@ export default function Home() {
             setAddModalInitialDate(new Date());
             setShowAddModal(true);
           }}
-          className="sm:hidden fixed bottom-6 right-5 z-40 w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-500 text-white rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center active:scale-95 transition"
+          className="sm:hidden fixed bottom-6 right-5 z-40 w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-500 text-white rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center active:scale-95 transition print:hidden"
           aria-label="予定を追加"
         >
           <Plus className="w-7 h-7" />
