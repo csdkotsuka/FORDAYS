@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Sparkles,
   AlertCircle,
+  Info,
 } from 'lucide-react';
 
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isMock, setIsMock] = useState<boolean>(false);
+  const [apiMessage, setApiMessage] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
@@ -34,8 +36,26 @@ export default function Home() {
         throw new Error(`API error: ${res.status}`);
       }
       const data: EventsApiResponse = await res.json();
-      setEvents(data.events || []);
+      const loadedEvents = data.events || [];
+      setEvents(loadedEvents);
       setIsMock(data.source === 'mock');
+      setApiMessage(data.message || null);
+
+      // If events exist, check if current month has events; if not, align to closest event month
+      if (loadedEvents.length > 0) {
+        const now = new Date();
+        const hasEventsThisMonth = loadedEvents.some((ev) => {
+          const d = new Date(ev.start);
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        });
+
+        if (!hasEventsThisMonth) {
+          // Find the first upcoming event or latest past event
+          const futureEvents = loadedEvents.filter((ev) => new Date(ev.start) >= now);
+          const targetEvent = futureEvents.length > 0 ? futureEvents[0] : loadedEvents[0];
+          setCurrentDate(new Date(targetEvent.start));
+        }
+      }
     } catch (err: any) {
       console.error('Failed to load events:', err);
       setError('予定データの取得に失敗しました。');
@@ -86,13 +106,16 @@ export default function Home() {
               {isMock ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="hidden sm:inline">デモデータ表示中</span>
+                  <span className="hidden sm:inline">デモ表示中</span>
                   <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
                 </>
               ) : (
                 <>
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="hidden sm:inline">同期中</span>
+                  <span className="hidden sm:inline">Google同期中</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">
+                    {events.length}件
+                  </span>
                 </>
               )}
             </button>
@@ -113,15 +136,15 @@ export default function Home() {
 
       {/* Main Container */}
       <div className="max-w-4xl w-full mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-4 flex-1">
-        {/* Banner if mock data */}
-        {isMock && !loading && (
+        {/* API notification message / hint */}
+        {apiMessage && (
           <div
             onClick={() => setShowHelpModal(true)}
-            className="p-3 bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 rounded-2xl flex items-center justify-between gap-2 cursor-pointer hover:shadow-sm transition group"
+            className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start justify-between gap-2 cursor-pointer hover:bg-amber-100/70 transition group"
           >
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-amber-900 font-medium">
-              <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>現在はサンプルの予定を表示しています。実際のカレンダー連携はこちら</span>
+            <div className="flex items-start gap-2 text-xs sm:text-sm text-amber-900 font-medium">
+              <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>{apiMessage}</span>
             </div>
             <span className="text-xs text-amber-700 font-semibold underline group-hover:text-amber-800 shrink-0">
               設定手順 →
@@ -152,7 +175,7 @@ export default function Home() {
               }`}
             >
               <List className="w-4 h-4" />
-              <span>リスト表示</span>
+              <span>リスト表示 ({events.length})</span>
             </button>
           </div>
         </div>
