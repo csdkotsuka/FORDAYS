@@ -1,23 +1,26 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { CalendarEvent, EventsApiResponse } from '@/lib/types';
 import { CalendarView } from '@/components/CalendarView';
 import { ListView } from '@/components/ListView';
 import { EventDetailModal } from '@/components/EventDetailModal';
+import { AddEventModal } from '@/components/AddEventModal';
 import { ConfigHelpModal } from '@/components/ConfigHelpModal';
 import {
   Calendar as CalendarIcon,
   List,
   RotateCw,
   HelpCircle,
-  Sparkles,
-  AlertCircle,
+  Plus,
   Info,
 } from 'lucide-react';
 
+const STORAGE_CUSTOM_EVENTS_KEY = 'fordays_custom_events';
+
 export default function Home() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [apiEvents, setApiEvents] = useState<CalendarEvent[]>([]);
+  const [customEvents, setCustomEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isMock, setIsMock] = useState<boolean>(false);
@@ -25,7 +28,20 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+
+  // Load locally added custom events from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_CUSTOM_EVENTS_KEY);
+      if (saved) {
+        setCustomEvents(JSON.parse(saved));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -37,11 +53,10 @@ export default function Home() {
       }
       const data: EventsApiResponse = await res.json();
       const loadedEvents = data.events || [];
-      setEvents(loadedEvents);
+      setApiEvents(loadedEvents);
       setIsMock(data.source === 'mock');
       setApiMessage(data.message || null);
 
-      // If events exist, check if current month has events; if not, align to closest event month
       if (loadedEvents.length > 0) {
         const now = new Date();
         const hasEventsThisMonth = loadedEvents.some((ev) => {
@@ -50,7 +65,6 @@ export default function Home() {
         });
 
         if (!hasEventsThisMonth) {
-          // Find the first upcoming event or latest past event
           const futureEvents = loadedEvents.filter((ev) => new Date(ev.start) >= now);
           const targetEvent = futureEvents.length > 0 ? futureEvents[0] : loadedEvents[0];
           setCurrentDate(new Date(targetEvent.start));
@@ -68,8 +82,26 @@ export default function Home() {
     fetchEvents();
   }, [fetchEvents]);
 
+  // Combined events: API (Google/Mock) + Locally added events
+  const allEvents = useMemo(() => {
+    const combined = [...customEvents, ...apiEvents];
+    return combined.sort(
+      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+    );
+  }, [apiEvents, customEvents]);
+
+  const handleAddEvent = (newEvent: CalendarEvent) => {
+    const updated = [newEvent, ...customEvents];
+    setCustomEvents(updated);
+    try {
+      localStorage.setItem(STORAGE_CUSTOM_EVENTS_KEY, JSON.stringify(updated));
+    } catch (e) {
+      // ignore
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col pb-12">
+    <main className="min-h-screen bg-slate-50 flex flex-col pb-20 sm:pb-12">
       {/* Top Header */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200/80 px-4 py-3 sm:py-4 transition-all">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -93,6 +125,15 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Add Event Button (Desktop/Tablet Header) */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow active:scale-95 transition"
+            >
+              <Plus className="w-4 h-4" />
+              <span>新規予定</span>
+            </button>
+
             {/* Status indicator / Help button */}
             <button
               onClick={() => setShowHelpModal(true)}
@@ -112,9 +153,9 @@ export default function Home() {
               ) : (
                 <>
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="hidden sm:inline">Google同期中</span>
+                  <span className="hidden sm:inline">同期中</span>
                   <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">
-                    {events.length}件
+                    {allEvents.length}件
                   </span>
                 </>
               )}
@@ -175,20 +216,19 @@ export default function Home() {
               }`}
             >
               <List className="w-4 h-4" />
-              <span>リスト表示 ({events.length})</span>
+              <span>リスト表示 ({allEvents.length})</span>
             </button>
           </div>
         </div>
 
-        {/* Loading / Error States */}
-        {loading && events.length === 0 ? (
+        {/* Content */}
+        {loading && allEvents.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center space-y-3">
             <RotateCw className="w-8 h-8 text-sky-600 animate-spin" />
             <p className="text-sm font-medium text-gray-500">予定を読み込んでいます...</p>
           </div>
-        ) : error && events.length === 0 ? (
+        ) : error && allEvents.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 text-center border border-rose-100 shadow-sm space-y-3">
-            <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
             <p className="text-sm font-medium text-gray-700">{error}</p>
             <button
               onClick={fetchEvents}
@@ -201,20 +241,38 @@ export default function Home() {
           <div>
             {viewMode === 'calendar' ? (
               <CalendarView
-                events={events}
+                events={allEvents}
                 onSelectEvent={(ev) => setSelectedEvent(ev)}
                 currentDate={currentDate}
                 setCurrentDate={setCurrentDate}
               />
             ) : (
               <ListView
-                events={events}
+                events={allEvents}
                 onSelectEvent={(ev) => setSelectedEvent(ev)}
               />
             )}
           </div>
         )}
       </div>
+
+      {/* Floating Action Button (FAB) on mobile */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="sm:hidden fixed bottom-6 right-5 z-40 w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-500 text-white rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center active:scale-95 transition"
+        aria-label="予定を追加"
+      >
+        <Plus className="w-7 h-7" />
+      </button>
+
+      {/* Add Event Modal */}
+      <AddEventModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        existingEvents={allEvents}
+        onAddEvent={handleAddEvent}
+        initialDate={currentDate}
+      />
 
       {/* Event Detail Modal */}
       <EventDetailModal
