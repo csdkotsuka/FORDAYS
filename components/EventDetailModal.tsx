@@ -17,6 +17,7 @@ import {
   Palette,
   Edit3,
   Save,
+  Trash2,
 } from 'lucide-react';
 
 interface EventDetailModalProps {
@@ -24,6 +25,7 @@ interface EventDetailModalProps {
   onClose: () => void;
   isOwner?: boolean;
   onUpdateEvent?: (updated: CalendarEvent) => void;
+  onDeleteEvent?: (eventId: string) => void;
   allEvents?: CalendarEvent[];
 }
 
@@ -41,6 +43,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
   onClose,
   isOwner = false,
   onUpdateEvent,
+  onDeleteEvent,
   allEvents = [],
 }) => {
   const [downloaded, setDownloaded] = useState(false);
@@ -170,6 +173,15 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
     }
     setIsEditing(false);
     onClose();
+  };
+
+  const handleDelete = () => {
+    if (!event || !onDeleteEvent) return;
+    const ok = window.confirm(`予定「${event.title}」を削除してもよろしいですか？\n（この操作は元に戻せません）`);
+    if (ok) {
+      onDeleteEvent(event.id);
+      onClose();
+    }
   };
 
   const handleBottomButtonClick = () => {
@@ -536,12 +548,24 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Bottom Bar: Changes from "閉じる" to "保存" when modified */}
-        <div className="p-3.5 bg-gray-50 border-t border-gray-100">
+        {/* Bottom Bar: Changes from "閉じる" to "保存" when modified, plus Delete button for Owner */}
+        <div className="p-3.5 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
+          {isOwner && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="p-3 text-rose-500 hover:text-rose-700 bg-white hover:bg-rose-50 border border-gray-200 hover:border-rose-200 rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+              title="この予定を削除"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-xs font-bold">削除</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleBottomButtonClick}
-            className={`w-full py-3 text-center text-sm font-bold rounded-xl transition shadow-sm active:scale-[0.99] flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 text-center text-sm font-bold rounded-xl transition shadow-sm active:scale-[0.99] flex items-center justify-center gap-2 ${
               isDirty
                 ? 'bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 text-white shadow-sky-500/20 shadow-md'
                 : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'

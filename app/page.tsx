@@ -21,12 +21,14 @@ import {
 
 const STORAGE_CUSTOM_EVENTS_KEY = 'fordays_custom_events';
 const STORAGE_EDITED_EVENTS_KEY = 'fordays_edited_events';
+const STORAGE_DELETED_EVENTS_KEY = 'fordays_deleted_events';
 const STORAGE_IS_OWNER_KEY = 'fordays_is_owner';
 
 export default function Home() {
   const [apiEvents, setApiEvents] = useState<CalendarEvent[]>([]);
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>([]);
   const [editedEventsMap, setEditedEventsMap] = useState<{ [id: string]: CalendarEvent }>({});
+  const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [showOwnerModal, setShowOwnerModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -47,6 +49,9 @@ export default function Home() {
 
       const savedEdited = localStorage.getItem(STORAGE_EDITED_EVENTS_KEY);
       if (savedEdited) setEditedEventsMap(JSON.parse(savedEdited));
+
+      const savedDeleted = localStorage.getItem(STORAGE_DELETED_EVENTS_KEY);
+      if (savedDeleted) setDeletedEventIds(JSON.parse(savedDeleted));
 
       const savedOwner = localStorage.getItem(STORAGE_IS_OWNER_KEY);
       if (savedOwner === 'true') setIsOwner(true);
@@ -94,22 +99,24 @@ export default function Home() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Combined events with edited overrides applied:
+  // Combined events with edited overrides applied, and deleted events filtered out:
   const allEvents = useMemo(() => {
-    const combined = [...customEvents, ...apiEvents].map((ev) => {
-      const edited = editedEventsMap[ev.id];
-      if (edited) {
-        return {
-          ...ev,
-          ...edited,
-        };
-      }
-      return ev;
-    });
+    const combined = [...customEvents, ...apiEvents]
+      .filter((ev) => !deletedEventIds.includes(ev.id))
+      .map((ev) => {
+        const edited = editedEventsMap[ev.id];
+        if (edited) {
+          return {
+            ...ev,
+            ...edited,
+          };
+        }
+        return ev;
+      });
     return combined.sort(
       (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
     );
-  }, [apiEvents, customEvents, editedEventsMap]);
+  }, [apiEvents, customEvents, editedEventsMap, deletedEventIds]);
 
   const handleAddEvent = (newEvent: CalendarEvent) => {
     const updated = [newEvent, ...customEvents];
@@ -148,6 +155,42 @@ export default function Home() {
     if (selectedEvent && selectedEvent.id === updated.id) {
       setSelectedEvent(updated);
     }
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    // 1. Add to deletedEventIds and persist
+    const newDeleted = Array.from(new Set([...deletedEventIds, eventId]));
+    setDeletedEventIds(newDeleted);
+    try {
+      localStorage.setItem(STORAGE_DELETED_EVENTS_KEY, JSON.stringify(newDeleted));
+    } catch (e) {
+      // ignore
+    }
+
+    // 2. If it was in customEvents, remove it
+    if (customEvents.some((c) => c.id === eventId)) {
+      const newCustom = customEvents.filter((c) => c.id !== eventId);
+      setCustomEvents(newCustom);
+      try {
+        localStorage.setItem(STORAGE_CUSTOM_EVENTS_KEY, JSON.stringify(newCustom));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // 3. If it was in editedEventsMap, clean up
+    if (editedEventsMap[eventId]) {
+      const newEditedMap = { ...editedEventsMap };
+      delete newEditedMap[eventId];
+      setEditedEventsMap(newEditedMap);
+      try {
+        localStorage.setItem(STORAGE_EDITED_EVENTS_KEY, JSON.stringify(newEditedMap));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    setSelectedEvent(null);
   };
 
   const handleOwnerLogin = () => {
@@ -376,6 +419,7 @@ export default function Home() {
         onClose={() => setSelectedEvent(null)}
         isOwner={isOwner}
         onUpdateEvent={handleUpdateEvent}
+        onDeleteEvent={handleDeleteEvent}
         allEvents={allEvents}
       />
 
