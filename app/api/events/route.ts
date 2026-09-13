@@ -126,9 +126,14 @@ export async function GET() {
            endDate.getHours() === 0 && endDate.getMinutes() === 0 &&
            (endDate.getTime() - startDate.getTime()) >= 86400000);
 
+        let eventTitle = item.summary || '(タイトルなし)';
+        if (eventTitle === 'Busy') {
+          eventTitle = 'FORDAYS 予定 (詳細非公開)';
+        }
+
         events.push({
           id: item.uid || key,
-          title: item.summary || '(タイトルなし)',
+          title: eventTitle,
           description: item.description || '',
           location: item.location || '',
           start: startDate.toISOString(),

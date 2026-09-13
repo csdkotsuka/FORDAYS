@@ -95,6 +95,14 @@ export const ConfigHelpModal: React.FC<ConfigHelpModalProps> = ({
               <li>Redeploy（再デプロイ）すると、本番環境で自動的に予定が読み込まれます！</li>
             </ol>
           </div>
+
+          <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1">
+            <p className="font-bold">⚠️ 予定のタイトルが「詳細非公開」や「Busy」になる場合：</p>
+            <p className="leading-relaxed">
+              Googleカレンダーのアクセス権限が「予定の時間枠のみ（詳細を非表示）」になっている可能性があります。
+              カレンダー設定の「アクセス権限」で「すべての予定の詳細を表示」にするか、「カレンダーの統合」にある<strong>「iCal 形式の非公開 URL」</strong>を使用してください。
+            </p>
+          </div>
         </div>
 
         <button
