@@ -93,9 +93,9 @@ export const OfficialPrintHeader: React.FC<OfficialBannerProps> = ({
 
   return (
     <div className="hidden print:flex items-center justify-between gap-4 w-full border-b-2 border-black pb-2 mb-2">
-      {/* 1. Gold Title Banner: Compact width to let phone ads fit cleanly */}
-      <div className="bg-[#e59b00] text-black px-4 py-2 rounded-xs shadow-none shrink-0 flex items-center justify-center">
-        <h1 className="text-base font-black tracking-wider text-center text-black whitespace-nowrap">
+      {/* 1. Gold Title Banner: Prominent width (~2x) with large bold text */}
+      <div className="bg-[#e59b00] text-black px-6 py-2.5 rounded-xs shadow-none flex-1 max-w-[500px] min-w-[360px] flex items-center justify-center">
+        <h1 className="text-xl font-black tracking-widest text-center text-black whitespace-nowrap">
           {yearMonthStr} フォーデイズ予定表
         </h1>
       </div>
