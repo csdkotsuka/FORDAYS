@@ -42,6 +42,7 @@ export default function Home() {
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [addModalInitialDate, setAddModalInitialDate] = useState<Date>(new Date());
+  const [duplicateSourceEvent, setDuplicateSourceEvent] = useState<CalendarEvent | null>(null);
 
   // Load state from localStorage on client mount
   useEffect(() => {
@@ -218,7 +219,19 @@ export default function Home() {
       setShowOwnerModal(true);
       return;
     }
+    setDuplicateSourceEvent(null);
     setAddModalInitialDate(date);
+    setShowAddModal(true);
+  };
+
+  const handleDuplicateEvent = (source: CalendarEvent) => {
+    setSelectedEvent(null);
+    setDuplicateSourceEvent(source);
+    try {
+      setAddModalInitialDate(new Date(source.start));
+    } catch {
+      setAddModalInitialDate(new Date());
+    }
     setShowAddModal(true);
   };
 
@@ -270,6 +283,7 @@ export default function Home() {
             {isOwner && (
               <button
                 onClick={() => {
+                  setDuplicateSourceEvent(null);
                   setAddModalInitialDate(currentDate);
                   setShowAddModal(true);
                 }}
@@ -409,6 +423,7 @@ export default function Home() {
       {isOwner && (
         <button
           onClick={() => {
+            setDuplicateSourceEvent(null);
             setAddModalInitialDate(new Date());
             setShowAddModal(true);
           }}
@@ -422,10 +437,14 @@ export default function Home() {
       {/* Add Event Modal */}
       <AddEventModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => {
+          setShowAddModal(false);
+          setDuplicateSourceEvent(null);
+        }}
         existingEvents={allEvents}
         onAddEvent={handleAddEvent}
         initialDate={addModalInitialDate}
+        duplicateSource={duplicateSourceEvent}
       />
 
       {/* Event Detail Modal */}
@@ -436,6 +455,7 @@ export default function Home() {
         isOwner={isOwner}
         onUpdateEvent={handleUpdateEvent}
         onDeleteEvent={handleDeleteEvent}
+        onDuplicateEvent={handleDuplicateEvent}
         allEvents={allEvents}
       />
 

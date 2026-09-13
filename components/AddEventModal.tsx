@@ -17,6 +17,7 @@ import {
   Check,
   Palette,
 } from 'lucide-react';
+import { LocationInputWithAutocomplete } from './LocationInputWithAutocomplete';
 
 interface AddEventModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ interface AddEventModalProps {
   existingEvents: CalendarEvent[];
   onAddEvent: (newEvent: CalendarEvent) => void;
   initialDate?: Date;
+  duplicateSource?: CalendarEvent | null;
 }
 
 const STORAGE_CUSTOM_LOCATIONS_KEY = 'fordays_custom_locations';
@@ -34,6 +36,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   existingEvents,
   onAddEvent,
   initialDate,
+  duplicateSource,
 }) => {
   const [title, setTitle] = useState('');
   const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_COLOR_ID);
@@ -59,24 +62,47 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     }
   }, [isOpen]);
 
-  // Set initial dates when modal opens
+  // Set initial dates when modal opens (or populate from duplicateSource)
   useEffect(() => {
     if (isOpen) {
-      const baseDate = initialDate || new Date();
-      const dateStr = format(baseDate, 'yyyy-MM-dd');
+      if (duplicateSource) {
+        setTitle(duplicateSource.title ? `${duplicateSource.title} (コピー)` : '');
+        setLocation(duplicateSource.location || '');
+        setDescription(duplicateSource.description || '');
+        setSelectedColor(duplicateSource.color || DEFAULT_COLOR_ID);
+        setAllDay(Boolean(duplicateSource.allDay));
+        try {
+          const s = new Date(duplicateSource.start);
+          const e = new Date(duplicateSource.end);
+          setStartDateStr(format(s, 'yyyy-MM-dd'));
+          setStartTimeStr(format(s, 'HH:mm'));
+          setEndDateStr(format(e, 'yyyy-MM-dd'));
+          setEndTimeStr(format(e, 'HH:mm'));
+        } catch {
+          const baseDate = initialDate || new Date();
+          const dateStr = format(baseDate, 'yyyy-MM-dd');
+          setStartDateStr(dateStr);
+          setEndDateStr(dateStr);
+          setStartTimeStr('13:30');
+          setEndTimeStr('15:30');
+        }
+      } else {
+        const baseDate = initialDate || new Date();
+        const dateStr = format(baseDate, 'yyyy-MM-dd');
 
-      setStartDateStr(dateStr);
-      setEndDateStr(dateStr);
-      setStartTimeStr('13:30');
-      setEndTimeStr('15:30');
-      setTitle('');
-      setLocation('');
-      setDescription('');
-      setSelectedColor(DEFAULT_COLOR_ID);
-      setAllDay(false);
+        setStartDateStr(dateStr);
+        setEndDateStr(dateStr);
+        setStartTimeStr('13:30');
+        setEndTimeStr('15:30');
+        setTitle('');
+        setLocation('');
+        setDescription('');
+        setSelectedColor(DEFAULT_COLOR_ID);
+        setAllDay(false);
+      }
       setSavedSuccess(false);
     }
-  }, [isOpen, initialDate]);
+  }, [isOpen, initialDate, duplicateSource]);
 
   // Extract unique past locations from existing events + customLocations
   const pastLocations = useMemo(() => {
@@ -303,55 +329,17 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             </div>
           </div>
 
-          {/* Location with Past Locations dropdown */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-gray-700">
-                開催場所
-              </label>
-              {pastLocations.length > 0 && (
-                <span className="text-[11px] text-sky-600 font-medium">
-                  過去の場所から選択可能
-                </span>
-              )}
-            </div>
-
-            {/* Past locations dropdown selector */}
-            {pastLocations.length > 0 && (
-              <div className="relative">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setLocation(e.target.value);
-                    }
-                  }}
-                  className="w-full px-3 py-2 text-xs bg-sky-50/70 border border-sky-200 rounded-xl text-sky-900 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 transition appearance-none cursor-pointer"
-                >
-                  <option value="">▼ 過去の履歴から場所を選択する（{pastLocations.length}件）</option>
-                  {pastLocations.map((loc, idx) => (
-                    <option key={idx} value={loc}>
-                      {loc}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-sky-700">
-                  <MapPin className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            )}
-
-            {/* Location manual input */}
-            <div className="relative">
-              <MapPin className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="場所を入力（または上のプルダウンから選択）"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition"
-              />
-            </div>
+          {/* Location with Autocomplete & Past Locations */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-700">
+              開催場所
+            </label>
+            <LocationInputWithAutocomplete
+              value={location}
+              onChange={setLocation}
+              placeholder="場所・施設・住所を入力（候補が自動表示されます）"
+              pastLocations={pastLocations}
+            />
           </div>
 
           {/* Description */}

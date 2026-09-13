@@ -18,7 +18,9 @@ import {
   Edit3,
   Save,
   Trash2,
+  Copy,
 } from 'lucide-react';
+import { LocationInputWithAutocomplete } from './LocationInputWithAutocomplete';
 
 interface EventDetailModalProps {
   event: CalendarEvent | null;
@@ -26,6 +28,7 @@ interface EventDetailModalProps {
   isOwner?: boolean;
   onUpdateEvent?: (updated: CalendarEvent) => void;
   onDeleteEvent?: (eventId: string) => void;
+  onDuplicateEvent?: (sourceEvent: CalendarEvent) => void;
   allEvents?: CalendarEvent[];
 }
 
@@ -44,6 +47,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
   isOwner = false,
   onUpdateEvent,
   onDeleteEvent,
+  onDuplicateEvent,
   allEvents = [],
 }) => {
   const [downloaded, setDownloaded] = useState(false);
@@ -182,6 +186,13 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
       onDeleteEvent(event.id);
       onClose();
     }
+  };
+
+  const handleDuplicate = () => {
+    if (!event || !onDuplicateEvent) return;
+    const currentObj = buildUpdatedEvent();
+    onDuplicateEvent(currentObj);
+    onClose();
   };
 
   const handleBottomButtonClick = () => {
@@ -440,28 +451,11 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
           {isEditing ? (
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-gray-700">開催場所</label>
-              {pastLocations.length > 0 && (
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) setLocation(e.target.value);
-                  }}
-                  className="w-full px-2.5 py-1.5 text-xs bg-sky-50/70 border border-sky-200 rounded-lg text-sky-900 font-medium"
-                >
-                  <option value="">▼ 過去の場所から選ぶ</option>
-                  {pastLocations.map((loc, i) => (
-                    <option key={i} value={loc}>
-                      {loc}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <input
-                type="text"
-                placeholder="場所を入力"
+              <LocationInputWithAutocomplete
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-gray-50 border rounded-lg focus:bg-white"
+                onChange={setLocation}
+                placeholder="場所・施設・住所を入力（候補が自動表示されます）"
+                pastLocations={pastLocations}
               />
             </div>
           ) : (
@@ -548,18 +542,30 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Bottom Bar: Changes from "閉じる" to "保存" when modified, plus Delete button for Owner when editing */}
+        {/* Bottom Bar: Changes from "閉じる" to "保存" when modified, plus Delete & Duplicate buttons for Owner when editing */}
         <div className="p-3.5 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
           {isOwner && isEditing && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="p-3 text-rose-500 hover:text-rose-700 bg-white hover:bg-rose-50 border border-gray-200 hover:border-rose-200 rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
-              title="この予定を削除"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span className="text-xs font-bold">削除</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="p-3 text-rose-500 hover:text-rose-700 bg-white hover:bg-rose-50 border border-gray-200 hover:border-rose-200 rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+                title="この予定を削除"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="text-xs font-bold">削除</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDuplicate}
+                className="p-3 text-sky-600 hover:text-sky-800 bg-white hover:bg-sky-50 border border-gray-200 hover:border-sky-200 rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+                title="この予定を複製して新しく作成"
+              >
+                <Copy className="w-4 h-4" />
+                <span className="text-xs font-bold">複製</span>
+              </button>
+            </>
           )}
 
           <button
