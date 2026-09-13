@@ -40,6 +40,7 @@ export default function Home() {
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [addModalInitialDate, setAddModalInitialDate] = useState<Date>(new Date());
 
   // Load state from localStorage on client mount
   useEffect(() => {
@@ -211,25 +212,29 @@ export default function Home() {
     }
   };
 
+  const handleDateLongPress = (date: Date) => {
+    if (!isOwner) {
+      setShowOwnerModal(true);
+      return;
+    }
+    setAddModalInitialDate(date);
+    setShowAddModal(true);
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col pb-20 sm:pb-12">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200/80 px-4 py-3 sm:py-4 transition-all">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
-              <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200/80 px-3 sm:px-4 py-2.5 sm:py-4 transition-all">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+              <CalendarIcon className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black tracking-tight text-gray-900">
-                  FORDAYS
-                </h1>
-                <span className="text-xs font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-100">
-                  カレンダー
-                </span>
-              </div>
-              <p className="text-[11px] text-gray-400 font-medium">
+              <h1 className="text-lg sm:text-xl font-black tracking-tight text-gray-900 leading-tight">
+                FORDAYS
+              </h1>
+              <p className="text-[11px] text-gray-400 font-medium hidden sm:block">
                 Googleカレンダー連携スケジュール
               </p>
             </div>
@@ -249,7 +254,8 @@ export default function Home() {
               {isOwner ? (
                 <>
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>持ち主（編集可）</span>
+                  <span className="hidden sm:inline">持ち主（編集可）</span>
+                  <span className="sm:hidden text-xs">持ち主</span>
                 </>
               ) : (
                 <>
@@ -259,21 +265,24 @@ export default function Home() {
               )}
             </button>
 
-            {/* Add Event Button: Visible to Owner, or triggers login */}
+            {/* Add Event Button: Visible to Owner on desktop (on mobile, long-press calendar or use FAB) */}
             {isOwner && (
               <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow active:scale-95 transition"
+                onClick={() => {
+                  setAddModalInitialDate(currentDate);
+                  setShowAddModal(true);
+                }}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm hover:shadow active:scale-95 transition"
               >
                 <Plus className="w-4 h-4" />
                 <span>新規予定</span>
               </button>
             )}
 
-            {/* Sync status indicator */}
+            {/* Sync status indicator: Hidden on mobile to avoid clutter, count omitted */}
             <button
               onClick={() => setShowHelpModal(true)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition ${
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition ${
                 isMock
                   ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
                   : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
@@ -283,16 +292,13 @@ export default function Home() {
               {isMock ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="hidden sm:inline">デモ表示中</span>
+                  <span>デモ表示中</span>
                   <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
                 </>
               ) : (
                 <>
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="hidden sm:inline">同期中</span>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">
-                    {allEvents.length}件
-                  </span>
+                  <span>同期中</span>
                 </>
               )}
             </button>
@@ -301,7 +307,7 @@ export default function Home() {
             <button
               onClick={fetchEvents}
               disabled={loading}
-              className="p-2 text-gray-500 hover:text-sky-600 rounded-xl hover:bg-gray-100 active:scale-95 transition disabled:opacity-50"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-sky-600 rounded-xl hover:bg-gray-100 active:scale-95 transition disabled:opacity-50"
               aria-label="再読み込み"
               title="予定を再読み込み"
             >
@@ -381,6 +387,7 @@ export default function Home() {
                 onSelectEvent={(ev) => setSelectedEvent(ev)}
                 currentDate={currentDate}
                 setCurrentDate={setCurrentDate}
+                onDateLongPress={handleDateLongPress}
               />
             ) : (
               <ListView
@@ -395,7 +402,10 @@ export default function Home() {
       {/* Floating Action Button (FAB) on mobile: only for Owner */}
       {isOwner && (
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={() => {
+            setAddModalInitialDate(new Date());
+            setShowAddModal(true);
+          }}
           className="sm:hidden fixed bottom-6 right-5 z-40 w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-500 text-white rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center active:scale-95 transition"
           aria-label="予定を追加"
         >
@@ -409,7 +419,7 @@ export default function Home() {
         onClose={() => setShowAddModal(false)}
         existingEvents={allEvents}
         onAddEvent={handleAddEvent}
-        initialDate={currentDate}
+        initialDate={addModalInitialDate}
       />
 
       {/* Event Detail Modal */}

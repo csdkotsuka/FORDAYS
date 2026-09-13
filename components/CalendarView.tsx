@@ -30,6 +30,7 @@ interface CalendarViewProps {
   onSelectEvent: (event: CalendarEvent) => void;
   currentDate: Date;
   setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
+  onDateLongPress?: (date: Date) => void;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -37,8 +38,51 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onSelectEvent,
   currentDate,
   setCurrentDate,
+  onDateLongPress,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const longPressTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const touchStartPosRef = React.useRef<{ x: number; y: number } | null>(null);
+  const isLongPressTriggeredRef = React.useRef<boolean>(false);
+
+  const startLongPress = (date: Date, clientX: number, clientY: number) => {
+    isLongPressTriggeredRef.current = false;
+    touchStartPosRef.current = { x: clientX, y: clientY };
+
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
+
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressTriggeredRef.current = true;
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        try {
+          window.navigator.vibrate(40);
+        } catch {}
+      }
+      if (onDateLongPress) {
+        onDateLongPress(date);
+      }
+    }, 450);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPosRef.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
+    if (dx > 8 || dy > 8) {
+      cancelLongPress();
+    }
+  };
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
@@ -103,6 +147,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* Calendar Grid Container */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Hint Bar */}
+        <div className="px-3 py-1.5 bg-sky-50/50 border-b border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+          <span>タップで詳細表示</span>
+          <span className="text-sky-700 font-medium">日付長押しで新規予定を追加</span>
+        </div>
+
         {/* Days of week header */}
         <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/70 text-center text-xs font-semibold py-2.5">
           {weekDays.map((dayName, idx) => {
@@ -133,13 +183,39 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             return (
               <div
                 key={day.toISOString()}
+                onTouchStart={(e) => {
+                  const touch = e.touches[0];
+                  startLongPress(day, touch.clientX, touch.clientY);
+                }}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={cancelLongPress}
+                onTouchCancel={cancelLongPress}
+                onMouseDown={(e) => {
+                  if (e.button === 0) {
+                    startLongPress(day, e.clientX, e.clientY);
+                  }
+                }}
+                onMouseMove={(e) => {
+                  if (!touchStartPosRef.current) return;
+                  const dx = Math.abs(e.clientX - touchStartPosRef.current.x);
+                  const dy = Math.abs(e.clientY - touchStartPosRef.current.y);
+                  if (dx > 8 || dy > 8) {
+                    cancelLongPress();
+                  }
+                }}
+                onMouseUp={cancelLongPress}
+                onMouseLeave={cancelLongPress}
                 onClick={() => {
+                  if (isLongPressTriggeredRef.current) {
+                    isLongPressTriggeredRef.current = false;
+                    return;
+                  }
                   setSelectedDate(day);
                   if (dayEvents.length === 1) {
                     onSelectEvent(dayEvents[0]);
                   }
                 }}
-                className={`min-h-[76px] sm:min-h-[105px] p-1.5 sm:p-2 cursor-pointer transition flex flex-col justify-between ${
+                className={`min-h-[76px] sm:min-h-[105px] p-1.5 sm:p-2 cursor-pointer select-none transition flex flex-col justify-between ${
                   !inCurrentMonth ? 'bg-gray-50/40 text-gray-300' : 'hover:bg-sky-50/40'
                 } ${isSelected ? 'bg-sky-50 ring-2 ring-inset ring-sky-500' : ''}`}
               >
@@ -177,6 +253,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     return (
                       <div
                         key={ev.id}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectEvent(ev);

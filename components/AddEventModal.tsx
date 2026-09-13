@@ -63,13 +63,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       const baseDate = initialDate || new Date();
-      const defaultStart = startOfHour(addHours(baseDate, 1));
-      const defaultEnd = addHours(defaultStart, 1.5);
+      const dateStr = format(baseDate, 'yyyy-MM-dd');
 
-      setStartDateStr(format(defaultStart, 'yyyy-MM-dd'));
-      setStartTimeStr(format(defaultStart, 'HH:mm'));
-      setEndDateStr(format(defaultEnd, 'yyyy-MM-dd'));
-      setEndTimeStr(format(defaultEnd, 'HH:mm'));
+      setStartDateStr(dateStr);
+      setEndDateStr(dateStr);
+      setStartTimeStr('13:30');
+      setEndTimeStr('15:30');
       setTitle('');
       setLocation('');
       setDescription('');
