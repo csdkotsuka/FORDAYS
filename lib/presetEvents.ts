@@ -222,3 +222,121 @@ export const FORDAYS_OCTOBER_2026_EVENTS: CalendarEvent[] = [
     source: 'google',
   },
 ];
+
+export const FORDAYS_NOVEMBER_2026_EVENTS: CalendarEvent[] = [
+  {
+    id: 'fordays-2026-11-04-1',
+    title: '宇和島SS',
+    location: 'パフィオ宇和島',
+    description: '宇和島SS（核酸栄養セミナー） 13:30〜',
+    start: '2026-11-04T04:30:00.000Z', // 13:30 JST
+    end: '2026-11-04T06:30:00.000Z',   // 15:30 JST
+    allDay: false,
+    color: 'emerald', // SS: 核酸栄養
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-07-1',
+    title: '伊予SS',
+    location: '松前文化センター',
+    description: '伊予SS（核酸栄養セミナー） 13:30〜',
+    start: '2026-11-07T04:30:00.000Z', // 13:30 JST
+    end: '2026-11-07T06:30:00.000Z',   // 15:30 JST
+    allDay: false,
+    color: 'emerald', // SS: 核酸栄養
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-10-1',
+    title: '大望年会ミーティング③',
+    location: '(南予エリア)調整中',
+    description: '大望年会ミーティング第3回目 13:30〜',
+    start: '2026-11-10T04:30:00.000Z', // 13:30 JST
+    end: '2026-11-10T06:30:00.000Z',   // 15:30 JST
+    allDay: false,
+    color: 'purple',
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-12-1',
+    title: '西条CS',
+    location: '西条市地域創生センター',
+    description: '西条CS（美容セミナー） 13:30〜',
+    start: '2026-11-12T04:30:00.000Z', // 13:30 JST
+    end: '2026-11-12T06:30:00.000Z',   // 15:30 JST
+    allDay: false,
+    color: 'rose', // CS: 美容
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-13-1',
+    title: '脳活祭り',
+    location: '丸亀市民会館',
+    description: '会社主催イベント: 脳活祭り（丸亀市民会館）',
+    start: '2026-11-13T00:00:00.000Z',
+    end: '2026-11-13T23:59:59.000Z',
+    allDay: true,
+    color: 'amber', // 会社主催イベント等
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-21-1',
+    title: 'LDハッピーデイ',
+    location: '広島サロン',
+    description: '対象者限定開催: LDハッピーデイ（広島サロン）',
+    start: '2026-11-21T00:00:00.000Z',
+    end: '2026-11-21T23:59:59.000Z',
+    allDay: true,
+    color: 'sky', // 対象者限定開催
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-22-1',
+    title: 'LDハッピーデイ',
+    location: '四国中央市',
+    description: '対象者限定開催: LDハッピーデイ（四国中央市）',
+    start: '2026-11-22T00:00:00.000Z',
+    end: '2026-11-22T23:59:59.000Z',
+    allDay: true,
+    color: 'sky', // 対象者限定開催
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-24-1',
+    title: '松山FS',
+    location: 'JA太陽市 まってる',
+    description: '松山FS（会社案内セミナー） 13:30〜',
+    start: '2026-11-24T04:30:00.000Z', // 13:30 JST
+    end: '2026-11-24T06:30:00.000Z',   // 15:30 JST
+    allDay: false,
+    color: 'indigo', // FS: 会社案内
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-26-1',
+    title: '大望年会ミーティング④',
+    location: '(中予エリア)調整中',
+    description: '大望年会ミーティング第4回目 13:30〜',
+    start: '2026-11-26T04:30:00.000Z', // 13:30 JST
+    end: '2026-11-26T06:30:00.000Z',   // 15:30 JST
+    allDay: false,
+    color: 'purple',
+    source: 'google',
+  },
+  {
+    id: 'fordays-2026-11-30-1',
+    title: '脳活 アフター会',
+    location: 'ホテルオークラ丸亀',
+    description: '会社主催イベント: 脳活 アフター会（ホテルオークラ丸亀）',
+    start: '2026-11-30T00:00:00.000Z',
+    end: '2026-11-30T23:59:59.000Z',
+    allDay: true,
+    color: 'amber', // 会社主催イベント等
+    source: 'google',
+  },
+];
+
+export const FORDAYS_PRESET_EVENTS: CalendarEvent[] = [
+  ...FORDAYS_OCTOBER_2026_EVENTS,
+  ...FORDAYS_NOVEMBER_2026_EVENTS,
+];

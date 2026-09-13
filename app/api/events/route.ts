@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import ical from 'node-ical';
 import { CalendarEvent, EventsApiResponse } from '@/lib/types';
 import { getMockEvents } from '@/lib/mockData';
-import { FORDAYS_OCTOBER_2026_EVENTS } from '@/lib/presetEvents';
+import { FORDAYS_PRESET_EVENTS } from '@/lib/presetEvents';
 
 export const dynamic = 'force-dynamic';
 
 function mergePresetEvents(events: CalendarEvent[]): CalendarEvent[] {
   const combined = [...events];
-  for (const preset of FORDAYS_OCTOBER_2026_EVENTS) {
+  for (const preset of FORDAYS_PRESET_EVENTS) {
     const exists = combined.some(
       (e) => e.title === preset.title && e.start.slice(0, 10) === preset.start.slice(0, 10)
     );
