@@ -3,7 +3,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import { PhoneCall, Calendar as CalendarIcon } from 'lucide-react';
+import { PhoneCall, CalendarSync } from 'lucide-react';
 
 interface OfficialBannerProps {
   currentDate?: Date;
@@ -79,37 +79,22 @@ export const OfficialPhoneBanners: React.FC<OfficialPhoneBannersProps> = ({ onSy
           </div>
         </a>
 
-        {/* Calendar Sync Button (Orange/Amber with Clean Icon) */}
+        {/* Calendar Sync Utility Button (Subdued, distinct utility taste) */}
         <button
           type="button"
           onClick={onSyncClick}
-          className="group block text-left border-2 border-[#d97706] hover:border-[#b45309] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98] cursor-pointer"
+          className="group flex flex-col items-center justify-center p-1.5 sm:p-2 bg-slate-50 hover:bg-slate-100/90 border border-slate-300 hover:border-slate-400 rounded-xl transition shadow-2xs active:scale-[0.98] cursor-pointer text-center"
           title="このカレンダー全体をスマホに同期・一括登録"
         >
-          {/* Header Bar */}
-          <div className="bg-gradient-to-r from-[#d97706] via-[#ea580c] to-[#d97706] text-white px-1 py-1 text-center">
-            <p className="text-[8.5px] sm:text-[10px] leading-tight font-medium opacity-95 truncate">
-              スマホに予定を入れる
-            </p>
-            <p className="text-[9.5px] sm:text-xs font-black tracking-wide truncate">
-              「カレンダー同期」
-            </p>
+          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-200 text-slate-600 group-hover:text-slate-900 group-hover:border-slate-400 flex items-center justify-center shadow-2xs transition mb-1 shrink-0">
+            <CalendarSync className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-
-          {/* Body with Clean Calendar Icon (No Grandma Image) */}
-          <div className="p-1 sm:p-2 bg-white group-hover:bg-amber-50/60 transition flex items-center justify-center gap-1.5 sm:gap-2">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-            </div>
-            <div className="text-left leading-tight min-w-0 flex-1">
-              <div className="text-[10.5px] sm:text-xs md:text-sm font-black text-amber-900 group-hover:text-amber-700 transition truncate">
-                カレンダー同期
-              </div>
-              <p className="text-[7.5px] sm:text-[9px] text-amber-700 font-bold truncate">
-                スマホに一括登録
-              </p>
-            </div>
-          </div>
+          <span className="text-[10px] sm:text-xs font-bold text-slate-700 group-hover:text-slate-900 leading-tight block">
+            カレンダー同期
+          </span>
+          <span className="text-[7.5px] sm:text-[9px] text-slate-500 font-medium leading-tight block mt-0.5">
+            スマホに一括保存
+          </span>
         </button>
       </div>
     </div>

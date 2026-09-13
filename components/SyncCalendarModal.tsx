@@ -68,25 +68,25 @@ export const SyncCalendarModal: React.FC<SyncCalendarModalProps> = ({
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs transition-opacity"
     >
       <div
-        className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 border-2 border-amber-500/20"
+        className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 border border-gray-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle on mobile */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 sm:hidden" />
 
         {/* Top Header */}
-        <div className="p-4 sm:p-5 border-b border-amber-100 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-gray-200 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/30 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-slate-800 text-white flex items-center justify-center shadow-xs shrink-0">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
-                  かんたん同期
+                <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                  カレンダー連携
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-black text-gray-900 leading-tight">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">
                 カレンダー全体をスマホに同期
               </h2>
             </div>
@@ -94,7 +94,7 @@ export const SyncCalendarModal: React.FC<SyncCalendarModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-white/80 transition"
+            className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-200 transition"
             title="閉じる"
             aria-label="閉じる"
           >
@@ -105,17 +105,17 @@ export const SyncCalendarModal: React.FC<SyncCalendarModalProps> = ({
         {/* Body Content */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
           {/* Visual card */}
-          <div className="bg-gradient-to-br from-amber-50/80 via-orange-50/50 to-white rounded-2xl p-4 border border-amber-200/80 flex items-center gap-4 shadow-xs">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
-              <CalendarIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center gap-4 shadow-2xs">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <CalendarIcon className="w-6 h-6 text-white" />
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-1 text-amber-700 text-xs font-black">
-                <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>ボタン1つでかんたん登録！</span>
+              <div className="flex items-center gap-1 text-slate-700 text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                <span>ワンタップで一括登録！</span>
               </div>
-              <p className="text-xs sm:text-sm font-bold text-gray-800 leading-snug">
-                このカレンダーの予定（全 <span className="text-amber-600 font-black text-base">{events.length}</span> 件）を、あなたのスマホのカレンダーにまとめて全部入れられます。
+              <p className="text-xs sm:text-sm font-medium text-gray-700 leading-snug">
+                このカレンダーの予定（全 <span className="text-sky-700 font-bold text-base">{events.length}</span> 件）を、お使いのスマホのカレンダーにまとめて保存できます。
               </p>
             </div>
           </div>
@@ -125,9 +125,9 @@ export const SyncCalendarModal: React.FC<SyncCalendarModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadAll}
-              className="w-full py-4 px-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl shadow-lg shadow-orange-500/25 active:scale-[0.98] transition flex items-center justify-center gap-3 font-black text-base sm:text-lg border-2 border-white/20"
+              className="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2.5 font-bold text-sm sm:text-base"
             >
-              <Download className="w-6 h-6 shrink-0 animate-bounce" />
+              <Download className="w-5 h-5 shrink-0" />
               <span>① スマホにまとめて全部入れる</span>
             </button>
 
@@ -144,24 +144,24 @@ export const SyncCalendarModal: React.FC<SyncCalendarModalProps> = ({
             )}
           </div>
 
-          {/* Super Simple 3 Steps for Grandma */}
+          {/* Simple 3 Steps */}
           <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200/80 space-y-3">
-            <h3 className="text-xs font-black text-gray-700 flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
               <span>🔰</span>
               <span>使いかた（３ステップ）</span>
             </h3>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs space-y-1">
-                <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black flex items-center justify-center mx-auto">
+                <div className="w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-bold flex items-center justify-center mx-auto">
                   1
                 </div>
                 <p className="text-[11px] font-bold text-gray-800 leading-tight">
-                  上のオレンジのボタンを押す
+                  上のボタンを押す
                 </p>
               </div>
 
               <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs space-y-1">
-                <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black flex items-center justify-center mx-auto">
+                <div className="w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-bold flex items-center justify-center mx-auto">
                   2
                 </div>
                 <p className="text-[11px] font-bold text-gray-800 leading-tight">
