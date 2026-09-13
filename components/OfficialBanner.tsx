@@ -3,9 +3,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import { PhoneCall } from 'lucide-react';
-
-import Image from 'next/image';
+import { PhoneCall, Calendar as CalendarIcon } from 'lucide-react';
 
 interface OfficialBannerProps {
   currentDate?: Date;
@@ -53,35 +51,35 @@ export const OfficialPhoneBanners: React.FC<OfficialPhoneBannersProps> = ({ onSy
           </div>
         </a>
 
-        {/* Customer Dial (Navy) */}
+        {/* Order Dial (Mauve / Dusty Rose) */}
         <a
-          href="tel:0120950888"
-          className="group block border-2 border-[#0f172a] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98]"
-          title="お客さまダイヤルに発信: 0120-950-888"
+          href="tel:0120371119"
+          className="group block border-2 border-[#9f577b] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98]"
+          title="ご注文専用ダイヤルに発信: 0120-371-119"
         >
           {/* Header Bar */}
-          <div className="bg-[#0f172a] text-white px-1 py-1 text-center">
+          <div className="bg-[#9f577b] text-white px-1 py-1 text-center">
             <p className="text-[8.5px] sm:text-[10px] leading-tight font-medium opacity-90 truncate">
-              ご注文、各種変更、問合せ
+              ご注文・各種変更・問合せ
             </p>
             <p className="text-[9.5px] sm:text-xs font-black tracking-wide truncate">
-              「お客さまダイヤル」
+              「ご注文専用ダイヤル」
             </p>
           </div>
 
           {/* Number & Hours */}
-          <div className="p-1 sm:p-2 text-center bg-white group-hover:bg-sky-50/40 transition">
-            <div className="flex items-center justify-center gap-0.5 text-[11px] sm:text-sm md:text-base font-black text-gray-900 tracking-tight leading-snug">
-              <PhoneCall className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#0f172a] shrink-0" />
-              <span className="truncate">0120-950-888</span>
+          <div className="p-1 sm:p-2 text-center bg-white group-hover:bg-rose-50/40 transition">
+            <div className="flex items-center justify-center gap-0.5 text-[11px] sm:text-sm md:text-base font-black text-[#b91c1c] tracking-tight leading-snug">
+              <PhoneCall className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#9f577b] shrink-0" />
+              <span className="truncate">0120-371-119</span>
             </div>
             <p className="text-[7.5px] sm:text-[9.5px] text-gray-600 font-semibold mt-0.5 truncate">
-              受付 平日9:45〜17:30
+              受付 平日9:45〜18:00 土〜13:00
             </p>
           </div>
         </a>
 
-        {/* Calendar Sync Button (Orange/Amber with Grandma Illustration) */}
+        {/* Calendar Sync Button (Orange/Amber with Clean Icon) */}
         <button
           type="button"
           onClick={onSyncClick}
@@ -98,16 +96,10 @@ export const OfficialPhoneBanners: React.FC<OfficialPhoneBannersProps> = ({ onSy
             </p>
           </div>
 
-          {/* Body with Grandma Image */}
-          <div className="p-1 sm:p-2 bg-white group-hover:bg-amber-50/60 transition flex items-center justify-center gap-1 sm:gap-2">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg overflow-hidden border border-amber-300 shrink-0 shadow-2xs bg-amber-50">
-              <Image
-                src="/calendar_sync_obachan.jpg"
-                alt="おばあちゃんでもわかるカレンダー同期"
-                width={36}
-                height={36}
-                className="w-full h-full object-cover"
-              />
+          {/* Body with Clean Calendar Icon (No Grandma Image) */}
+          <div className="p-1 sm:p-2 bg-white group-hover:bg-amber-50/60 transition flex items-center justify-center gap-1.5 sm:gap-2">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
             <div className="text-left leading-tight min-w-0 flex-1">
               <div className="text-[10.5px] sm:text-xs md:text-sm font-black text-amber-900 group-hover:text-amber-700 transition truncate">
@@ -127,7 +119,7 @@ export const OfficialPhoneBanners: React.FC<OfficialPhoneBannersProps> = ({ onSy
 /**
  * Official FORDAYS Calendar Header for A4 Print / PDF output.
  * Replicates the uploaded image:
- * [Gold title banner: 2026年 11月 フォーデイズ予定表] [Green Consumer Dial] [Navy Customer Dial] [Update date box]
+ * [Gold title banner: 2026年 11月 フォーデイズ予定表] [Green Consumer Dial] [Mauve Order Dial] [Update date box]
  */
 export const OfficialPrintHeader: React.FC<OfficialBannerProps> = ({
   currentDate = new Date(),
@@ -145,7 +137,7 @@ export const OfficialPrintHeader: React.FC<OfficialBannerProps> = ({
         </h1>
       </div>
 
-      {/* 2. Middle Banners: Consumer Consultation Dial & Customer Dial */}
+      {/* 2. Middle Banners: Consumer Consultation Dial & Order Dial */}
       <div className="flex items-center gap-3 shrink-0">
         {/* Consumer Consultation Dial */}
         <div className="border border-[#004d25] rounded overflow-hidden bg-white text-center w-[215px] shrink-0">
@@ -163,18 +155,18 @@ export const OfficialPrintHeader: React.FC<OfficialBannerProps> = ({
           </div>
         </div>
 
-        {/* Customer Dial */}
-        <div className="border border-[#0f172a] rounded overflow-hidden bg-white text-center w-[215px] shrink-0">
-          <div className="bg-[#0f172a] text-white px-1.5 py-0.5 text-[8.5px] leading-tight font-bold whitespace-nowrap">
+        {/* Order Dial (Mauve) */}
+        <div className="border border-[#9f577b] rounded overflow-hidden bg-white text-center w-[215px] shrink-0">
+          <div className="bg-[#9f577b] text-white px-1.5 py-0.5 text-[8.5px] leading-tight font-bold whitespace-nowrap">
             ご注文、各種変更、お問合せは<br />
-            「お客さまダイヤル」
+            「ご注文専用ダイヤル」
           </div>
           <div className="py-1 px-1 bg-white">
-            <div className="text-[14px] font-black text-black leading-tight tracking-wider whitespace-nowrap">
-              0120-950-888
+            <div className="text-[14px] font-black text-[#b91c1c] leading-tight tracking-wider whitespace-nowrap">
+              0120-371-119
             </div>
             <div className="text-[8px] text-gray-800 font-bold leading-tight whitespace-nowrap mt-0.5">
-              受付時間 平日9:45〜17:30 他
+              受付 平日9:45〜18:00 土曜9:45〜13:00
             </div>
           </div>
         </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { CalendarEvent } from '@/lib/types';
 import { downloadAllEventsIcsFile } from '@/lib/calendarHelper';
 import {
@@ -105,16 +104,10 @@ export const SyncCalendarModal: React.FC<SyncCalendarModalProps> = ({
 
         {/* Body Content */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
-          {/* Visual card with Grandma illustration */}
+          {/* Visual card */}
           <div className="bg-gradient-to-br from-amber-50/80 via-orange-50/50 to-white rounded-2xl p-4 border border-amber-200/80 flex items-center gap-4 shadow-xs">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border-2 border-amber-300 shadow-md relative bg-white">
-              <Image
-                src="/calendar_sync_obachan.jpg"
-                alt="おばあちゃんでもわかるカレンダー同期"
-                width={96}
-                height={96}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+              <CalendarIcon className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1 text-amber-700 text-xs font-black">
