@@ -2,8 +2,22 @@ import { NextResponse } from 'next/server';
 import ical from 'node-ical';
 import { CalendarEvent, EventsApiResponse } from '@/lib/types';
 import { getMockEvents } from '@/lib/mockData';
+import { FORDAYS_OCTOBER_2026_EVENTS } from '@/lib/presetEvents';
 
 export const dynamic = 'force-dynamic';
+
+function mergePresetEvents(events: CalendarEvent[]): CalendarEvent[] {
+  const combined = [...events];
+  for (const preset of FORDAYS_OCTOBER_2026_EVENTS) {
+    const exists = combined.some(
+      (e) => e.title === preset.title && e.start.slice(0, 10) === preset.start.slice(0, 10)
+    );
+    if (!exists) {
+      combined.push(preset);
+    }
+  }
+  return combined.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+}
 
 /**
  * Normalize and convert user-provided Google Calendar URLs to proper .ics endpoint
@@ -59,7 +73,7 @@ export async function GET() {
 
   if (!rawIcalUrl) {
     return NextResponse.json<EventsApiResponse>({
-      events: getMockEvents(),
+      events: mergePresetEvents(getMockEvents()),
       source: 'mock',
       message: 'GOOGLE_CALENDAR_ICAL_URL が未設定のため、サンプルデータを表示しています。',
     });
@@ -86,7 +100,7 @@ export async function GET() {
     const trimmed = icsText.trim();
     if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html') || trimmed.includes('<body')) {
       return NextResponse.json<EventsApiResponse>({
-        events: getMockEvents(),
+        events: mergePresetEvents(getMockEvents()),
         source: 'mock',
         message: '設定されたURLからHTMLが返却されました。Googleカレンダーの「設定と共有」>「カレンダーの統合」にある「iCal 形式の非公開URL（basic.ics）」を設定してください。',
       });
@@ -94,7 +108,7 @@ export async function GET() {
 
     if (!icsText.includes('BEGIN:VCALENDAR')) {
       return NextResponse.json<EventsApiResponse>({
-        events: getMockEvents(),
+        events: mergePresetEvents(getMockEvents()),
         source: 'mock',
         message: '有効なカレンダーデータ(iCal)が見つかりませんでした。URLを確認してください。',
       });
@@ -177,23 +191,22 @@ export async function GET() {
     // If after parsing, 0 events were found in the calendar
     if (events.length === 0) {
       return NextResponse.json<EventsApiResponse>({
-        events: getMockEvents(),
-        source: 'mock',
-        message: 'Googleカレンダーに登録されている予定が0件だったため、サンプルの予定を表示しています。',
+        events: mergePresetEvents([]),
+        source: 'google',
       });
     }
 
     // Sort events by start date
-    events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+    const finalEvents = mergePresetEvents(events);
 
     return NextResponse.json<EventsApiResponse>({
-      events,
+      events: finalEvents,
       source: 'google',
     });
   } catch (error: any) {
     console.error('Error fetching/parsing Google Calendar iCal:', error);
     return NextResponse.json<EventsApiResponse>({
-      events: getMockEvents(),
+      events: mergePresetEvents(getMockEvents()),
       source: 'mock',
       message: `カレンダーの取得に失敗したためサンプルを表示しています (${error?.message || '不明なエラー'})`,
     });
