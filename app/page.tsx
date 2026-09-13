@@ -371,6 +371,7 @@ export default function Home() {
 
       {/* Event Detail Modal */}
       <EventDetailModal
+        key={selectedEvent ? `${selectedEvent.id}-${selectedEvent.start}` : 'none'}
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
         isOwner={isOwner}

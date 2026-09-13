@@ -27,6 +27,15 @@ interface EventDetailModalProps {
   allEvents?: CalendarEvent[];
 }
 
+function safeFormatDate(d: Date, fmt: string): string {
+  try {
+    if (isNaN(d.getTime())) return '';
+    return format(d, fmt, { locale: ja });
+  } catch (e) {
+    return '';
+  }
+}
+
 export const EventDetailModal: React.FC<EventDetailModalProps> = ({
   event,
   onClose,
@@ -37,18 +46,38 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
   const [downloaded, setDownloaded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Editable fields
-  const [title, setTitle] = useState('');
-  const [color, setColor] = useState('sky');
-  const [location, setLocation] = useState('');
-  const [description, setDescription] = useState('');
-  const [allDay, setAllDay] = useState(false);
-  const [startDateStr, setStartDateStr] = useState('');
-  const [startTimeStr, setStartTimeStr] = useState('');
-  const [endDateStr, setEndDateStr] = useState('');
-  const [endTimeStr, setEndTimeStr] = useState('');
+  // Safe initial dates from event
+  const initialDates = useMemo(() => {
+    if (!event) return { startDate: '', startTime: '10:00', endDate: '', endTime: '12:00' };
+    try {
+      const s = new Date(event.start);
+      const e = new Date(event.end);
+      const sValid = !isNaN(s.getTime()) ? s : new Date();
+      const eValid = !isNaN(e.getTime()) ? e : sValid;
 
-  // Reset/Initialize fields whenever the event opens
+      return {
+        startDate: safeFormatDate(sValid, 'yyyy-MM-dd'),
+        startTime: safeFormatDate(sValid, 'HH:mm'),
+        endDate: safeFormatDate(eValid, 'yyyy-MM-dd'),
+        endTime: safeFormatDate(eValid, 'HH:mm'),
+      };
+    } catch {
+      return { startDate: '', startTime: '10:00', endDate: '', endTime: '12:00' };
+    }
+  }, [event]);
+
+  // Editable fields with safe initial values
+  const [title, setTitle] = useState(event?.title || '');
+  const [color, setColor] = useState(event?.color || 'sky');
+  const [location, setLocation] = useState(event?.location || '');
+  const [description, setDescription] = useState(event?.description || '');
+  const [allDay, setAllDay] = useState(Boolean(event?.allDay));
+  const [startDateStr, setStartDateStr] = useState(initialDates.startDate);
+  const [startTimeStr, setStartTimeStr] = useState(initialDates.startTime);
+  const [endDateStr, setEndDateStr] = useState(initialDates.endDate);
+  const [endTimeStr, setEndTimeStr] = useState(initialDates.endTime);
+
+  // Re-sync when event changes
   useEffect(() => {
     if (event) {
       setTitle(event.title || '');
@@ -56,16 +85,14 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
       setLocation(event.location || '');
       setDescription(event.description || '');
       setAllDay(Boolean(event.allDay));
+      setStartDateStr(initialDates.startDate);
+      setStartTimeStr(initialDates.startTime);
+      setEndDateStr(initialDates.endDate);
+      setEndTimeStr(initialDates.endTime);
       setIsEditing(false);
-
-      const startD = new Date(event.start);
-      const endD = new Date(event.end);
-      setStartDateStr(format(startD, 'yyyy-MM-dd'));
-      setStartTimeStr(format(startD, 'HH:mm'));
-      setEndDateStr(format(endD, 'yyyy-MM-dd'));
-      setEndTimeStr(format(endD, 'HH:mm'));
+      setDownloaded(false);
     }
-  }, [event]);
+  }, [event, initialDates]);
 
   // Extract past locations for dropdown
   const pastLocations = useMemo(() => {
@@ -79,13 +106,6 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
   // Check if anything has been modified
   const isDirty = useMemo(() => {
     if (!event) return false;
-    const initialStartD = new Date(event.start);
-    const initialEndD = new Date(event.end);
-
-    const initialStartDateStr = format(initialStartD, 'yyyy-MM-dd');
-    const initialStartTimeStr = format(initialStartD, 'HH:mm');
-    const initialEndDateStr = format(initialEndD, 'yyyy-MM-dd');
-    const initialEndTimeStr = format(initialEndD, 'HH:mm');
 
     const titleChanged = title.trim() !== (event.title || '').trim();
     const colorChanged = (color || 'sky') !== (event.color || 'sky');
@@ -94,27 +114,37 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
     const allDayChanged = Boolean(allDay) !== Boolean(event.allDay);
 
     const datesChanged =
-      startDateStr !== initialStartDateStr ||
-      startTimeStr !== initialStartTimeStr ||
-      endDateStr !== initialEndDateStr ||
-      endTimeStr !== initialEndTimeStr;
+      startDateStr !== initialDates.startDate ||
+      startTimeStr !== initialDates.startTime ||
+      endDateStr !== initialDates.endDate ||
+      endTimeStr !== initialDates.endTime;
 
     return titleChanged || colorChanged || locationChanged || descChanged || allDayChanged || datesChanged;
-  }, [event, title, color, location, description, allDay, startDateStr, startTimeStr, endDateStr, endTimeStr]);
+  }, [event, title, color, location, description, allDay, startDateStr, startTimeStr, endDateStr, endTimeStr, initialDates]);
 
-  // Build the updated event object
-  const buildUpdatedEvent = (): CalendarEvent | null => {
-    if (!event) return null;
+  // Build the updated event safely
+  const buildUpdatedEvent = (): CalendarEvent => {
+    if (!event) throw new Error('No event');
 
-    let startIso: string;
-    let endIso: string;
+    let startIso = event.start;
+    let endIso = event.end;
 
-    if (allDay) {
-      startIso = new Date(`${startDateStr}T00:00:00`).toISOString();
-      endIso = new Date(`${endDateStr || startDateStr}T23:59:59`).toISOString();
-    } else {
-      startIso = new Date(`${startDateStr}T${startTimeStr}:00`).toISOString();
-      endIso = new Date(`${endDateStr || startDateStr}T${endTimeStr}:00`).toISOString();
+    try {
+      if (startDateStr) {
+        if (allDay) {
+          const s = new Date(`${startDateStr}T00:00:00`);
+          const e = new Date(`${endDateStr || startDateStr}T23:59:59`);
+          if (!isNaN(s.getTime())) startIso = s.toISOString();
+          if (!isNaN(e.getTime())) endIso = e.toISOString();
+        } else if (startTimeStr) {
+          const s = new Date(`${startDateStr}T${startTimeStr}:00`);
+          const e = new Date(`${endDateStr || startDateStr}T${endTimeStr || startTimeStr}:00`);
+          if (!isNaN(s.getTime())) startIso = s.toISOString();
+          if (!isNaN(e.getTime())) endIso = e.toISOString();
+        }
+      }
+    } catch {
+      // fallback to original start/end
     }
 
     return {
@@ -130,10 +160,12 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
   };
 
   const handleSave = () => {
-    if (onUpdateEvent) {
-      const updated = buildUpdatedEvent();
-      if (updated) {
+    if (onUpdateEvent && event) {
+      try {
+        const updated = buildUpdatedEvent();
         onUpdateEvent(updated);
+      } catch (e) {
+        console.error('Error saving event:', e);
       }
     }
     setIsEditing(false);
@@ -176,21 +208,36 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
 
   const currentTheme = getColorTheme(color);
 
-  const startDate = new Date(event.start);
-  const endDate = new Date(event.end);
-  const dateStr = format(startDate, 'yyyy年M月d日 (E)', { locale: ja });
-  const timeStr = event.allDay
-    ? '終日'
-    : `${format(startDate, 'HH:mm')} 〜 ${format(endDate, 'HH:mm')}`;
+  // Safe display date and time strings
+  let dateStr = '';
+  let timeStr = '';
+  try {
+    const sDate = new Date(event.start);
+    const eDate = new Date(event.end);
+    dateStr = safeFormatDate(sDate, 'yyyy年M月d日 (E)');
+    timeStr = event.allDay
+      ? '終日'
+      : `${safeFormatDate(sDate, 'HH:mm')} 〜 ${safeFormatDate(eDate, 'HH:mm')}`;
+  } catch {
+    dateStr = '日時未定';
+    timeStr = '';
+  }
 
   const handleDownloadIcs = () => {
-    const currentObj = buildUpdatedEvent() || event;
+    const currentObj = buildUpdatedEvent();
     downloadIcsFile(currentObj);
     setDownloaded(true);
     setTimeout(() => setDownloaded(false), 3000);
   };
 
-  const googleCalUrl = getGoogleCalendarUrl(buildUpdatedEvent() || event);
+  // Safe Google Calendar link
+  let googleCalUrl = '#';
+  try {
+    googleCalUrl = getGoogleCalendarUrl(buildUpdatedEvent());
+  } catch {
+    googleCalUrl = getGoogleCalendarUrl(event);
+  }
+
   const mapSearchUrl = location
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
     : null;
@@ -245,7 +292,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
               )}
             </div>
 
-            {/* Owner Edit Button (No X button as requested) */}
+            {/* Owner Edit Button (No X button) */}
             {isOwner && (
               <button
                 type="button"
@@ -262,7 +309,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
             )}
           </div>
 
-          {/* Color Switcher (Visible to Owner, or if already editing) */}
+          {/* Color Switcher (Visible to Owner only) */}
           {isOwner && (
             <div className="flex items-center justify-between p-3 bg-gray-50/80 rounded-2xl border border-gray-100">
               <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
@@ -291,7 +338,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
             </div>
           )}
 
-          {/* Date & Time info: Readonly or Editable */}
+          {/* Date & Time info */}
           {isEditing ? (
             <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200 space-y-2.5">
               <div className="flex items-center justify-between">
