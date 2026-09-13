@@ -19,137 +19,101 @@ interface OfficialPhoneBannersProps {
  * Placed: Consumer Dial | Customer Dial | Calendar Sync Button (with Grandma illustration)
  */
 export const OfficialPhoneBanners: React.FC<OfficialPhoneBannersProps> = ({ onSyncClick }) => {
-  // Common dial card JSX for reuse
-  const orderDial = (
-    <a
-      href="tel:0120371119"
-      className="group block border-2 border-[#9f577b] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98] h-full"
-      title="ご注文専用ダイヤルに発信: 0120-371-119"
-    >
-      <div className="bg-[#9f577b] text-white px-1.5 py-1 text-center">
-        <p className="text-[8px] sm:text-[9.5px] leading-tight font-medium opacity-90 truncate">
-          製品のご注文・ご予約・問合せ
-        </p>
-        <p className="text-[9.5px] sm:text-xs font-black tracking-wide truncate">
-          「ご注文専用ダイヤル」
-        </p>
-      </div>
-      <div className="p-1 sm:p-2 text-center bg-white group-hover:bg-rose-50/40 transition">
-        <div className="flex items-center justify-center gap-0.5 text-xs sm:text-sm md:text-base font-black text-[#b91c1c] tracking-tight leading-snug">
-          <PhoneCall className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#9f577b] shrink-0" />
-          <span className="truncate">0120-371-119</span>
-        </div>
-        <p className="text-[7.5px] sm:text-[9.5px] text-gray-600 font-semibold mt-0.5 truncate">
-          受付 平日9:45〜18:00 土〜13:00
-        </p>
-      </div>
-    </a>
-  );
-
-  const customerDial = (
-    <a
-      href="tel:0120950888"
-      className="group block border-2 border-[#0f172a] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98] h-full"
-      title="お客さまダイヤルに発信: 0120-950-888"
-    >
-      <div className="bg-[#0f172a] text-white px-1.5 py-1 text-center">
-        <p className="text-[8px] sm:text-[9.5px] leading-tight font-medium opacity-90 truncate">
-          各種変更・お問合せ
-        </p>
-        <p className="text-[9.5px] sm:text-xs font-black tracking-wide truncate">
-          「お客さまダイヤル」
-        </p>
-      </div>
-      <div className="p-1 sm:p-2 text-center bg-white group-hover:bg-sky-50/40 transition">
-        <div className="flex items-center justify-center gap-0.5 text-xs sm:text-sm md:text-base font-black text-gray-900 tracking-tight leading-snug">
-          <PhoneCall className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#0f172a] shrink-0" />
-          <span className="truncate">0120-950-888</span>
-        </div>
-        <p className="text-[7.5px] sm:text-[9.5px] text-gray-600 font-semibold mt-0.5 truncate">
-          受付 平日9:45〜17:30 他
-        </p>
-      </div>
-    </a>
-  );
-
-  const consumerDial = (
-    <a
-      href="tel:0120033007"
-      className="group block border-2 border-[#004d25] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98] h-full"
-      title="消費者相談ダイヤルに発信: 0120-033-007"
-    >
-      <div className="bg-[#004d25] text-white px-1.5 py-1 text-center">
-        <p className="text-[8px] sm:text-[9.5px] leading-tight font-medium opacity-90 truncate">
-          気になることはお気軽に
-        </p>
-        <p className="text-[9.5px] sm:text-xs font-black tracking-wide truncate">
-          「消費者相談」
-        </p>
-      </div>
-      <div className="p-1 sm:p-2 text-center bg-white group-hover:bg-emerald-50/40 transition">
-        <div className="flex items-center justify-center gap-0.5 text-xs sm:text-sm md:text-base font-black text-gray-900 tracking-tight leading-snug">
-          <PhoneCall className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#004d25] shrink-0" />
-          <span className="truncate">0120-033-</span>
-          <span className="text-[#dc2626] font-black">007</span>
-        </div>
-        <p className="text-[7.5px] sm:text-[9.5px] text-gray-600 font-semibold mt-0.5 truncate">
-          受付 平日10:00〜17:00
-        </p>
-      </div>
-    </a>
-  );
-
-  const syncButton = (
-    <button
-      type="button"
-      onClick={onSyncClick}
-      className="group flex flex-col items-center justify-center p-1.5 bg-white hover:bg-sky-50/60 border border-slate-300 hover:border-sky-400 rounded-xl transition shadow-2xs hover:shadow-xs active:scale-95 text-center cursor-pointer h-full shrink-0 w-16 sm:w-20 md:w-22"
-      title="このカレンダー全体をスマホに同期・一括登録"
-    >
-      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-sky-100 group-hover:text-sky-700 flex items-center justify-center transition shadow-2xs mb-0.5 shrink-0">
-        <CalendarSync className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-      </div>
-      <span className="text-[9.5px] sm:text-[10.5px] font-black text-slate-700 group-hover:text-sky-700 leading-tight block">
-        カレンダー<br />同期
-      </span>
-    </button>
-  );
-
   return (
     <div className="w-full">
-      {/* Desktop / Tablet Layout (md and up): 3 Phone Banners in 1-2-3 order + Compact Sync Button with large icon */}
-      <div className="hidden md:flex items-stretch gap-2.5 max-w-4xl mx-auto">
-        <div className="grid grid-cols-3 gap-2.5 flex-1">
-          {/* 1. ご注文専用ダイヤル */}
-          {orderDial}
-          {/* 2. お客さまダイヤル */}
-          {customerDial}
-          {/* 3. 消費者相談 */}
-          {consumerDial}
-        </div>
-
-        {/* Compact Sync Button (Large icon, small footprint) */}
-        {syncButton}
-      </div>
-
-      {/* Mobile Layout (< md): 
-          Row 1: [1. ご注文専用ダイヤル] [2. お客さまダイヤル] (Large & Prominent)
-          Row 2: [3. 消費者相談 (flex-1)] [カレンダー同期 (compact)]
-      */}
-      <div className="md:hidden space-y-1.5 max-w-lg mx-auto">
-        {/* Row 1: Order & Customer Dials */}
-        <div className="grid grid-cols-2 gap-1.5">
-          {orderDial}
-          {customerDial}
-        </div>
-
-        {/* Row 2: Consumer Consultation + Sync Button */}
-        <div className="flex items-stretch gap-1.5">
-          <div className="flex-1">
-            {consumerDial}
+      {/* Horizontally scrollable row on mobile, centered single row on desktop.
+          Cards are tightly sized so text never wraps (極力狭い枠で文字の折り返しなし). */}
+      <div className="flex items-stretch gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:justify-center max-w-4xl mx-auto no-scrollbar">
+        {/* 1. ご注文専用ダイヤル (Mauve) */}
+        <a
+          href="tel:0120371119"
+          className="group block w-[190px] shrink-0 border-2 border-[#9f577b] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98]"
+          title="ご注文専用ダイヤルに発信: 0120-371-119"
+        >
+          <div className="bg-[#9f577b] text-white px-2 py-1 text-center whitespace-nowrap">
+            <p className="text-[9px] leading-tight font-medium opacity-90">
+              製品のご注文・ご予約・問合せ
+            </p>
+            <p className="text-[11px] font-black tracking-wide">
+              「ご注文専用ダイヤル」
+            </p>
           </div>
-          {syncButton}
-        </div>
+          <div className="p-1.5 text-center bg-white group-hover:bg-rose-50/40 transition whitespace-nowrap">
+            <div className="flex items-center justify-center gap-1 text-sm font-black text-[#b91c1c] tracking-tight leading-snug">
+              <PhoneCall className="w-3 h-3 text-[#9f577b] shrink-0" />
+              <span>0120-371-119</span>
+            </div>
+            <p className="text-[9px] text-gray-600 font-semibold mt-0.5 leading-tight">
+              受付 平日9:45〜18:00 土〜13:00
+            </p>
+          </div>
+        </a>
+
+        {/* 2. お客さまダイヤル (Navy) */}
+        <a
+          href="tel:0120950888"
+          className="group block w-[180px] shrink-0 border-2 border-[#0f172a] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98]"
+          title="お客さまダイヤルに発信: 0120-950-888"
+        >
+          <div className="bg-[#0f172a] text-white px-2 py-1 text-center whitespace-nowrap">
+            <p className="text-[9px] leading-tight font-medium opacity-90">
+              各種変更・お問合せ
+            </p>
+            <p className="text-[11px] font-black tracking-wide">
+              「お客さまダイヤル」
+            </p>
+          </div>
+          <div className="p-1.5 text-center bg-white group-hover:bg-sky-50/40 transition whitespace-nowrap">
+            <div className="flex items-center justify-center gap-1 text-sm font-black text-gray-900 tracking-tight leading-snug">
+              <PhoneCall className="w-3 h-3 text-[#0f172a] shrink-0" />
+              <span>0120-950-888</span>
+            </div>
+            <p className="text-[9px] text-gray-600 font-semibold mt-0.5 leading-tight">
+              受付 平日9:45〜17:30 他
+            </p>
+          </div>
+        </a>
+
+        {/* 3. 消費者相談ダイヤル (Green) */}
+        <a
+          href="tel:0120033007"
+          className="group block w-[180px] shrink-0 border-2 border-[#004d25] rounded-xl overflow-hidden bg-white shadow-xs hover:shadow-md transition active:scale-[0.98]"
+          title="消費者相談ダイヤルに発信: 0120-033-007"
+        >
+          <div className="bg-[#004d25] text-white px-2 py-1 text-center whitespace-nowrap">
+            <p className="text-[9px] leading-tight font-medium opacity-90">
+              気になることはお気軽に
+            </p>
+            <p className="text-[11px] font-black tracking-wide">
+              「消費者相談ダイヤル」
+            </p>
+          </div>
+          <div className="p-1.5 text-center bg-white group-hover:bg-emerald-50/40 transition whitespace-nowrap">
+            <div className="flex items-center justify-center gap-1 text-sm font-black text-gray-900 tracking-tight leading-snug">
+              <PhoneCall className="w-3 h-3 text-[#004d25] shrink-0" />
+              <span>0120-033-</span>
+              <span className="text-[#dc2626] font-black">007</span>
+            </div>
+            <p className="text-[9px] text-gray-600 font-semibold mt-0.5 leading-tight">
+              受付 平日10:00〜17:00
+            </p>
+          </div>
+        </a>
+
+        {/* 4. カレンダー同期ボタン (Compact with Large Icon) */}
+        <button
+          type="button"
+          onClick={onSyncClick}
+          className="group flex flex-col items-center justify-center w-[76px] shrink-0 p-1.5 bg-white hover:bg-sky-50/60 border border-slate-300 hover:border-sky-400 rounded-xl transition shadow-2xs hover:shadow-xs active:scale-95 text-center cursor-pointer"
+          title="このカレンダー全体をスマホに同期・一括登録"
+        >
+          <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-sky-100 group-hover:text-sky-700 flex items-center justify-center transition shadow-2xs mb-1 shrink-0">
+            <CalendarSync className="w-5 h-5" />
+          </div>
+          <span className="text-[10px] font-black text-slate-700 group-hover:text-sky-700 leading-tight block whitespace-nowrap">
+            カレンダー<br />同期
+          </span>
+        </button>
       </div>
     </div>
   );
