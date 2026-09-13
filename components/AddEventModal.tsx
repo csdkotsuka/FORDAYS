@@ -120,6 +120,34 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     return Array.from(locSet).sort();
   }, [existingEvents, customLocations]);
 
+  // Check if modified or duplicated
+  const isDirty = useMemo(() => {
+    if (savedSuccess) return false;
+    if (duplicateSource) return true;
+    return Boolean(title.trim() || location.trim() || description.trim());
+  }, [savedSuccess, duplicateSource, title, location, description]);
+
+  const handleSafeClose = () => {
+    if (isDirty) {
+      const ok = window.confirm('変更内容が保存されていません。\n保存せずに閉じてもよろしいですか？');
+      if (!ok) return;
+    }
+    onClose();
+  };
+
+  // Keyboard shortcut: Escape key handling
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleSafeClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isDirty]);
+
   if (!isOpen) return null;
 
   // Build the event object
@@ -197,7 +225,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm transition-opacity">
+    <div
+      onClick={handleSafeClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm transition-opacity"
+    >
       <div
         className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -211,11 +242,16 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             <div className="p-2 bg-sky-100 text-sky-700 rounded-xl">
               <Plus className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900">予定を新規作成</h2>
+            <h2 className="text-lg font-bold text-gray-900">
+              {duplicateSource ? '予定を複製して作成' : '予定を新規作成'}
+            </h2>
           </div>
           <button
-            onClick={onClose}
+            type="button"
+            onClick={handleSafeClose}
             className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition"
+            title="閉じる"
+            aria-label="閉じる"
           >
             <X className="w-5 h-5" />
           </button>

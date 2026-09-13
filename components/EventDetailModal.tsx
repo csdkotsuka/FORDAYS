@@ -19,6 +19,7 @@ import {
   Save,
   Trash2,
   Copy,
+  X,
 } from 'lucide-react';
 import { LocationInputWithAutocomplete } from './LocationInputWithAutocomplete';
 
@@ -203,6 +204,14 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
     }
   };
 
+  const handleSafeClose = () => {
+    if (isDirty) {
+      const ok = window.confirm('変更内容が保存されていません。\n保存せずに閉じてもよろしいですか？');
+      if (!ok) return;
+    }
+    onClose();
+  };
+
   // Keyboard shortcut: Escape key handling for PC
   useEffect(() => {
     if (!event) return;
@@ -210,22 +219,13 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        if (isDirty) {
-          const confirmSave = window.confirm('変更内容を保存しますか？\n・[OK]: 保存して閉じる\n・[キャンセル]: 保存せずに閉じる');
-          if (confirmSave) {
-            handleSave();
-          } else {
-            onClose();
-          }
-        } else {
-          onClose();
-        }
+        handleSafeClose();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [event, isDirty, title, color, location, description, allDay, startDateStr, startTimeStr, endDateStr, endTimeStr]);
+  }, [event, isDirty]);
 
   if (!event) return null;
 
@@ -267,16 +267,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      if (isDirty) {
-        const confirmSave = window.confirm('変更内容を保存しますか？\n・[OK]: 保存して閉じる\n・[キャンセル]: 保存せずに閉じる');
-        if (confirmSave) {
-          handleSave();
-        } else {
-          onClose();
-        }
-      } else {
-        onClose();
-      }
+      handleSafeClose();
     }
   };
 
@@ -333,21 +324,33 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
               )}
             </div>
 
-            {/* Owner Edit Button (No X button) */}
-            {isOwner && (
+            {/* Actions: Edit & X close button */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(!isEditing)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    isEditing
+                      ? 'bg-sky-100 text-sky-800 hover:bg-sky-200'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>{isEditing ? '完了' : '編集'}</span>
+                </button>
+              )}
+
               <button
                 type="button"
-                onClick={() => setIsEditing(!isEditing)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 ${
-                  isEditing
-                    ? 'bg-sky-100 text-sky-800 hover:bg-sky-200'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
+                onClick={handleSafeClose}
+                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition"
+                title="閉じる"
+                aria-label="閉じる"
               >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>{isEditing ? '完了' : '編集'}</span>
+                <X className="w-5 h-5" />
               </button>
-            )}
+            </div>
           </div>
 
           {/* Color Switcher (Visible to Owner only) */}
