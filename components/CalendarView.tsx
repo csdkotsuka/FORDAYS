@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/lib/types';
+import { getColorTheme } from '@/lib/colorHelper';
 import {
   format,
   startOfMonth,
@@ -171,19 +172,27 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
                 {/* Event previews in calendar cell */}
                 <div className="mt-1 space-y-1 overflow-hidden flex-1">
-                  {dayEvents.slice(0, 2).map((ev) => (
-                    <div
-                      key={ev.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectEvent(ev);
-                      }}
-                      className="text-[10px] sm:text-xs truncate bg-sky-50 border border-sky-200/80 text-sky-900 rounded px-1 py-0.5 font-medium hover:bg-sky-100 transition active:scale-95"
-                      title={ev.title}
-                    >
-                      {ev.title}
-                    </div>
-                  ))}
+                  {dayEvents.slice(0, 2).map((ev) => {
+                    const evTheme = getColorTheme(ev.color);
+                    return (
+                      <div
+                        key={ev.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectEvent(ev);
+                        }}
+                        style={{
+                          backgroundColor: evTheme.bgLight,
+                          color: evTheme.textDark,
+                          borderColor: evTheme.border,
+                        }}
+                        className="text-[10px] sm:text-xs truncate border rounded px-1 py-0.5 font-semibold transition active:scale-95 shadow-2xs"
+                        title={ev.title}
+                      >
+                        {ev.title}
+                      </div>
+                    );
+                  })}
                   {dayEvents.length > 2 && (
                     <div className="text-[9px] sm:text-[11px] text-gray-500 font-medium pl-0.5">
                       他 {dayEvents.length - 2} 件
@@ -215,6 +224,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         ) : (
           <div className="space-y-2">
             {selectedDayEvents.map((ev) => {
+              const evTheme = getColorTheme(ev.color);
               const startD = new Date(ev.start);
               const endD = new Date(ev.end);
               const timeStr = ev.allDay
@@ -225,12 +235,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <div
                   key={ev.id}
                   onClick={() => onSelectEvent(ev)}
-                  className="p-3 bg-gradient-to-r from-sky-50/50 to-white hover:to-sky-50 border border-sky-100 rounded-xl cursor-pointer transition active:scale-[0.99] flex flex-col sm:flex-row sm:items-center justify-between gap-2 group"
+                  style={{
+                    borderLeftColor: evTheme.hex,
+                    borderLeftWidth: '4px',
+                  }}
+                  className="p-3 bg-white hover:bg-gray-50/80 border border-gray-100 rounded-xl cursor-pointer transition active:scale-[0.99] flex flex-col sm:flex-row sm:items-center justify-between gap-2 group shadow-2xs"
                 >
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-800">
-                        <Clock className="w-3.5 h-3.5 text-sky-600" />
+                      <span
+                        className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-md border"
+                        style={{
+                          backgroundColor: evTheme.bgLight,
+                          color: evTheme.textDark,
+                          borderColor: evTheme.border,
+                        }}
+                      >
+                        <Clock className="w-3.5 h-3.5" style={{ color: evTheme.hex }} />
                         {timeStr}
                       </span>
                       {ev.location && (

@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 
 const STORAGE_CUSTOM_EVENTS_KEY = 'fordays_custom_events';
+const STORAGE_EVENT_COLORS_KEY = 'fordays_event_colors';
 
 export default function Home() {
   const [apiEvents, setApiEvents] = useState<CalendarEvent[]>([]);
   const [customEvents, setCustomEvents] = useState<CalendarEvent[]>([]);
+  const [eventColorMap, setEventColorMap] = useState<{ [id: string]: string }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isMock, setIsMock] = useState<boolean>(false);
@@ -31,12 +33,16 @@ export default function Home() {
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
-  // Load locally added custom events from localStorage
+  // Load locally added custom events and event colors from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_CUSTOM_EVENTS_KEY);
-      if (saved) {
-        setCustomEvents(JSON.parse(saved));
+      const savedEvents = localStorage.getItem(STORAGE_CUSTOM_EVENTS_KEY);
+      if (savedEvents) {
+        setCustomEvents(JSON.parse(savedEvents));
+      }
+      const savedColors = localStorage.getItem(STORAGE_EVENT_COLORS_KEY);
+      if (savedColors) {
+        setEventColorMap(JSON.parse(savedColors));
       }
     } catch (e) {
       // ignore
@@ -82,13 +88,16 @@ export default function Home() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Combined events: API (Google/Mock) + Locally added events
+  // Combined events with colors merged: API (Google/Mock) + Locally added events
   const allEvents = useMemo(() => {
-    const combined = [...customEvents, ...apiEvents];
+    const combined = [...customEvents, ...apiEvents].map((ev) => ({
+      ...ev,
+      color: eventColorMap[ev.id] || ev.color || 'sky',
+    }));
     return combined.sort(
       (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
     );
-  }, [apiEvents, customEvents]);
+  }, [apiEvents, customEvents, eventColorMap]);
 
   const handleAddEvent = (newEvent: CalendarEvent) => {
     const updated = [newEvent, ...customEvents];
@@ -97,6 +106,26 @@ export default function Home() {
       localStorage.setItem(STORAGE_CUSTOM_EVENTS_KEY, JSON.stringify(updated));
     } catch (e) {
       // ignore
+    }
+  };
+
+  const handleUpdateEventColor = (eventId: string, newColorId: string) => {
+    const updatedMap = {
+      ...eventColorMap,
+      [eventId]: newColorId,
+    };
+    setEventColorMap(updatedMap);
+    try {
+      localStorage.setItem(STORAGE_EVENT_COLORS_KEY, JSON.stringify(updatedMap));
+    } catch (e) {
+      // ignore
+    }
+
+    if (selectedEvent && selectedEvent.id === eventId) {
+      setSelectedEvent({
+        ...selectedEvent,
+        color: newColorId,
+      });
     }
   };
 
@@ -278,6 +307,7 @@ export default function Home() {
       <EventDetailModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
+        onUpdateColor={handleUpdateEventColor}
       />
 
       {/* Config Help Modal */}

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CalendarEvent } from '@/lib/types';
+import { getColorTheme } from '@/lib/colorHelper';
 import { format, isPast, isToday } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import {
@@ -121,6 +122,7 @@ export const ListView: React.FC<ListViewProps> = ({ events, onSelectEvent }) => 
                 {/* Event items for this date */}
                 <div className="space-y-2">
                   {dayEvents.map((ev) => {
+                    const evTheme = getColorTheme(ev.color);
                     const startD = new Date(ev.start);
                     const endD = new Date(ev.end);
                     const timeStr = ev.allDay
@@ -131,12 +133,23 @@ export const ListView: React.FC<ListViewProps> = ({ events, onSelectEvent }) => 
                       <div
                         key={ev.id}
                         onClick={() => onSelectEvent(ev)}
-                        className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-sky-200 cursor-pointer transition active:scale-[0.99] flex items-center justify-between gap-3 group"
+                        style={{
+                          borderLeftColor: evTheme.hex,
+                          borderLeftWidth: '5px',
+                        }}
+                        className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md cursor-pointer transition active:scale-[0.99] flex items-center justify-between gap-3 group"
                       >
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center flex-wrap gap-2">
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">
-                              <Clock className="w-3 h-3 text-sky-600" />
+                            <span
+                              className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-md border"
+                              style={{
+                                backgroundColor: evTheme.bgLight,
+                                color: evTheme.textDark,
+                                borderColor: evTheme.border,
+                              }}
+                            >
+                              <Clock className="w-3 h-3" style={{ color: evTheme.hex }} />
                               {timeStr}
                             </span>
                             {ev.location && (

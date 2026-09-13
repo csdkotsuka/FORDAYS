@@ -3,6 +3,7 @@
 import React from 'react';
 import { CalendarEvent } from '@/lib/types';
 import { downloadIcsFile, getGoogleCalendarUrl } from '@/lib/calendarHelper';
+import { EVENT_COLORS, getColorTheme } from '@/lib/colorHelper';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import {
@@ -14,17 +15,25 @@ import {
   Download,
   ExternalLink,
   Check,
+  Palette,
 } from 'lucide-react';
 
 interface EventDetailModalProps {
   event: CalendarEvent | null;
   onClose: () => void;
+  onUpdateColor?: (eventId: string, newColorId: string) => void;
 }
 
-export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClose }) => {
+export const EventDetailModal: React.FC<EventDetailModalProps> = ({
+  event,
+  onClose,
+  onUpdateColor,
+}) => {
   const [downloaded, setDownloaded] = React.useState(false);
 
   if (!event) return null;
+
+  const currentTheme = getColorTheme(event.color);
 
   const startDate = new Date(event.start);
   const endDate = new Date(event.end);
@@ -54,12 +63,19 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClo
         {/* Header bar / drag handle on mobile */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 sm:hidden" />
 
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
           {/* Top row */}
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1 flex-1">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800">
-                FORDAYS 予定
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+                style={{
+                  backgroundColor: currentTheme.bgLight,
+                  color: currentTheme.textDark,
+                  borderColor: currentTheme.border,
+                }}
+              >
+                ● FORDAYS 予定
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
                 {event.title}
@@ -74,14 +90,47 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClo
             </button>
           </div>
 
+          {/* Color Switcher */}
+          <div className="flex items-center justify-between p-3 bg-gray-50/80 rounded-2xl border border-gray-100">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+              <Palette className="w-3.5 h-3.5 text-gray-500" />
+              <span>予定のカラー:</span>
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {EVENT_COLORS.map((c) => {
+                const isSelected = (event.color || 'sky') === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => onUpdateColor && onUpdateColor(event.id, c.id)}
+                    title={c.name}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center transition active:scale-90 ${
+                      isSelected ? 'ring-2 ring-offset-2 ring-gray-400 scale-110 shadow-sm' : 'hover:opacity-80'
+                    }`}
+                    style={{ backgroundColor: c.hex }}
+                  >
+                    {isSelected && <Check className="w-3.5 h-3.5 text-white drop-shadow-sm" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Date & Time info */}
-          <div className="bg-sky-50/70 border border-sky-100 rounded-xl p-4 space-y-2">
-            <div className="flex items-center text-sky-900 font-medium">
-              <CalendarIcon className="w-5 h-5 text-sky-600 mr-2.5 shrink-0" />
+          <div
+            className="border rounded-2xl p-4 space-y-2 transition-colors"
+            style={{
+              backgroundColor: currentTheme.bgLight,
+              borderColor: currentTheme.border,
+            }}
+          >
+            <div className="flex items-center font-bold" style={{ color: currentTheme.textDark }}>
+              <CalendarIcon className="w-5 h-5 mr-2.5 shrink-0" style={{ color: currentTheme.hex }} />
               <span>{dateStr}</span>
             </div>
-            <div className="flex items-center text-gray-700">
-              <Clock className="w-5 h-5 text-sky-600 mr-2.5 shrink-0" />
+            <div className="flex items-center text-gray-700 font-medium">
+              <Clock className="w-5 h-5 mr-2.5 shrink-0" style={{ color: currentTheme.hex }} />
               <span>{timeStr}</span>
             </div>
           </div>

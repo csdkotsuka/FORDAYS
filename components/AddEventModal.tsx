@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { CalendarEvent } from '@/lib/types';
 import { downloadIcsFile, getGoogleCalendarUrl } from '@/lib/calendarHelper';
+import { EVENT_COLORS, DEFAULT_COLOR_ID } from '@/lib/colorHelper';
 import { format, addHours, startOfHour } from 'date-fns';
 import {
   X,
@@ -14,6 +15,7 @@ import {
   Download,
   ExternalLink,
   Check,
+  Palette,
 } from 'lucide-react';
 
 interface AddEventModalProps {
@@ -34,6 +36,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   initialDate,
 }) => {
   const [title, setTitle] = useState('');
+  const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_COLOR_ID);
   const [allDay, setAllDay] = useState(false);
   const [startDateStr, setStartDateStr] = useState('');
   const [startTimeStr, setStartTimeStr] = useState('10:00');
@@ -70,6 +73,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       setTitle('');
       setLocation('');
       setDescription('');
+      setSelectedColor(DEFAULT_COLOR_ID);
       setAllDay(false);
       setSavedSuccess(false);
     }
@@ -114,6 +118,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       start: startIso,
       end: endIso,
       allDay,
+      color: selectedColor,
       source: 'mock',
     };
   };
@@ -206,6 +211,33 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition"
             />
+          </div>
+
+          {/* Color Palette Selector */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-gray-500" />
+              <span>予定のカラー</span>
+            </label>
+            <div className="flex items-center gap-2 flex-wrap bg-gray-50/80 p-2.5 rounded-xl border border-gray-100">
+              {EVENT_COLORS.map((c) => {
+                const isSelected = selectedColor === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedColor(c.id)}
+                    title={c.name}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center transition active:scale-95 relative ${
+                      isSelected ? 'ring-2 ring-offset-2 ring-gray-400 scale-105' : 'hover:opacity-80'
+                    }`}
+                    style={{ backgroundColor: c.hex }}
+                  >
+                    {isSelected && <Check className="w-4 h-4 text-white drop-shadow-sm" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* All day toggle */}

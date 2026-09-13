@@ -7,6 +7,7 @@ export interface CalendarEvent {
   end: string;   // ISO string
   allDay?: boolean;
   url?: string;
+  color?: string;
   source?: 'google' | 'mock';
 }
 
