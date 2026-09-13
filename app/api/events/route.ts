@@ -7,7 +7,12 @@ import { FORDAYS_PRESET_EVENTS } from '@/lib/presetEvents';
 export const dynamic = 'force-dynamic';
 
 function mergePresetEvents(events: CalendarEvent[]): CalendarEvent[] {
-  const combined = [...events];
+  // Filter out any "Busy" or "詳細非公開" placeholder events so real official events shine
+  const cleanedEvents = events.filter(
+    (e) => !e.title.includes('詳細非公開') && !e.title.includes('Busy')
+  );
+
+  const combined = [...cleanedEvents];
   for (const preset of FORDAYS_PRESET_EVENTS) {
     const exists = combined.some(
       (e) => e.title === preset.title && e.start.slice(0, 10) === preset.start.slice(0, 10)
