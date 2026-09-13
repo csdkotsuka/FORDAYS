@@ -548,9 +548,9 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Bottom Bar: Changes from "閉じる" to "保存" when modified, plus Delete button for Owner */}
+        {/* Bottom Bar: Changes from "閉じる" to "保存" when modified, plus Delete button for Owner when editing */}
         <div className="p-3.5 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
-          {isOwner && (
+          {isOwner && isEditing && (
             <button
               type="button"
               onClick={handleDelete}
